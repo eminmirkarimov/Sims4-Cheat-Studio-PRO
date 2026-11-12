@@ -13,7 +13,7 @@
 
 [🚀 DOWNLOAD THE WINDOWS APP]( https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/releases/latest ) · [🌐 OPEN THE WEB EDITION]( https://eminmirkarimov.github.io/Sims4-Cheat-Studio-PRO/ )
 
-[📖 Русская версия](README_RU.md) · [🧰 Setup guide](GITHUB_SETUP_RU.md) · [🐞 Report an issue](https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/issues/new)
+[📖 Русская версия](README_RU.md)  · [🐞 Report an issue](https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/issues/new)
 
 </div>
 
@@ -127,7 +127,6 @@ Sims4-Cheat-Studio-PRO/
 ├── RUN_HTML.bat                    # Open the HTML edition
 ├── README.md                       # English project home
 ├── README_RU.md                    # Russian guide
-├── GITHUB_SETUP_RU.md              # Publishing instructions
 ├── RELEASE_NOTES_v1.0.0.md         # First release notes
 ├── CHANGELOG.md                    # Version history
 ├── COPYRIGHT.txt                   # Author's copyright notice
