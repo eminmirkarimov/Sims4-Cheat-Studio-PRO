@@ -106,7 +106,6 @@ Sims4-Cheat-Studio-PRO/
 ├── RUN_HTML.bat                       # Opens the HTML edition in the default browser
 ├── README.md                          # Main GitHub page (English)
 ├── README_RU.md                       # Russian user guide
-├── GITHUB_SETUP_RU.md                 # Step-by-step publishing guide
 ├── RELEASE_NOTES_v1.0.0.md            # First release notes
 ├── CHANGELOG.md                       # Version history
 ├── COPYRIGHT.txt                      # Copyright notice / usage terms
