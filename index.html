@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Sims 4 Cheat Studio PRO — by Emin Mirkarimov</title>
+    <style>
+        /* === ТЕМЫ И ПЕРЕМЕННЫЕ В СТИЛЕ SIMS 4 === */
+        :root { scroll-behavior: smooth; }
+        :root[data-theme="dark"] {
+            --bg-main: #060a12;
+            --bg-header: rgba(11, 18, 32, 0.88);
+            --bg-card: rgba(18, 27, 46, 0.90);
+            --bg-input: #090f1d;
+            --bg-panel: linear-gradient(145deg, rgba(22, 34, 58, 0.92), rgba(12, 20, 36, 0.92));
+            --border: #24385c;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --sims-green: #2ecc71;
+            --sims-green-dark: #1e9e52;
+            --sims-blue: #00a8ff;
+            --sims-blue-dark: #0077b6;
+            --code-bg: #050810;
+            --code-text: #38bdf8;
+            --shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
+            --scroll-track: #080d18;
+            --bubble-bg: rgba(255, 255, 255, 0.96);
+            --bubble-text: #0f172a;
+            --bubble-border: #2ecc71;
+            --orb-opacity: 0.35;
+            --particle-opacity: 0.55;
+            --plumbob-bg-opacity: 0.28;
+        }
+
+        :root[data-theme="light"] {
+            --bg-main: #eaf3fc;
+            --bg-header: rgba(255, 255, 255, 0.90);
+            --bg-card: rgba(255, 255, 255, 0.92);
+            --bg-input: #eff5fb;
+            --bg-panel: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(225, 239, 252, 0.96));
+            --border: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --sims-green: #1eb944;
+            --sims-green-dark: #158a32;
+            --sims-blue: #0084ff;
+            --sims-blue-dark: #005bb5;
+            --code-bg: #f1f5f9;
+            --code-text: #0284c7;
+            --shadow: 0 10px 26px rgba(0, 85, 175, 0.10);
+            --scroll-track: #dbe7f3;
+            --bubble-bg: rgba(15, 23, 42, 0.95);
+            --bubble-text: #f8fafc;
+            --bubble-border: #0084ff;
+            --orb-opacity: 0.48;
+            --particle-opacity: 0.68;
+            --plumbob-bg-opacity: 0.38;
+        }
+
+        /* === КАСТОМНЫЙ СКРОЛЛБАР === */
+        ::-webkit-scrollbar { width: 11px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--scroll-track); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--sims-green), var(--sims-blue));
+            border-radius: 10px;
+            border: 2px solid var(--scroll-track);
+        }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #34d399, #38bdf8); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background-color 0.35s ease, color 0.35s ease;
+        }
+
+        /* === АНИМАЦИЯ ФОНА + МНОГОСЛОЙНЫЙ ПАРАЛЛАКС === */
+        .parallax-scene {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        .animated-aurora {
+            position: absolute;
+            inset: -20%;
+            background:
+                radial-gradient(circle at 20% 25%, rgba(46, 204, 113, 0.28), transparent 38%),
+                radial-gradient(circle at 80% 75%, rgba(0, 168, 255, 0.28), transparent 38%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.18), transparent 45%);
+            animation: auroraWave 12s ease-in-out infinite alternate;
+        }
+        @keyframes auroraWave {
+            0% { transform: scale(1) rotate(0deg) translate(0, 0); }
+            50% { transform: scale(1.12) rotate(3deg) translate(30px, -20px); }
+            100% { transform: scale(1.06) rotate(-3deg) translate(-30px, 20px); }
+        }
+        .parallax-layer {
+            position: absolute;
+            inset: -90px;
+            will-change: transform;
+            transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .p-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(48px);
+            opacity: var(--orb-opacity);
+            animation: orbPulse 7s ease-in-out infinite alternate;
+        }
+        @keyframes orbPulse {
+            0% { transform: scale(0.9) translateY(0px); }
+            100% { transform: scale(1.2) translateY(-35px); }
+        }
+        .p-plumbob {
+            position: absolute;
+            filter: drop-shadow(0 6px 16px rgba(46, 204, 113, 0.45));
+            opacity: var(--plumbob-bg-opacity);
+            animation: floatSpin 7s ease-in-out infinite;
+        }
+        @keyframes floatSpin {
+            0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+            50% { transform: translateY(-28px) rotate(16deg) scale(1.12); }
+        }
+
+        /* Постоянный поток взлетающих кристаллов */
+        .bg-particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            bottom: -50px;
+            background: linear-gradient(135deg, var(--sims-green), var(--sims-blue));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            opacity: var(--particle-opacity);
+            filter: drop-shadow(0 0 8px rgba(46, 204, 113, 0.5));
+            animation: floatUpStream linear infinite;
+        }
+        @keyframes floatUpStream {
+            0% { transform: translateY(0) rotate(0deg) scale(0.7); opacity: 0; }
+            15% { opacity: var(--particle-opacity); }
+            85% { opacity: var(--particle-opacity); }
+            100% { transform: translateY(-112vh) rotate(360deg) scale(1.35); opacity: 0; }
+        }
+
+        /* === ГИБКОЕ НЕПЕРЕКРЫВАЮЩЕЕ ОБЛАЧКО МЫСЛЕЙ SIMS 4 === */
+        #simsThoughtBubble {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: max-content;
+            max-width: 245px;
+            background: var(--bubble-bg);
+            backdrop-filter: blur(10px);
+            color: var(--bubble-text);
+            padding: 8px 13px;
+            border-radius: 18px;
+            border: 2.5px solid var(--bubble-border);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.28), 0 0 14px rgba(46, 204, 113, 0.28);
+            font-size: 11.5px;
+            font-weight: 600;
+            line-height: 1.38;
+            pointer-events: none !important;
+            user-select: none;
+            z-index: 10000;
+            opacity: 0;
+            transform: translate(-50%, -100%) translateY(6px) scale(0.86);
+            transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.12s ease-out, top 0.12s ease-out;
+        }
+        #simsThoughtBubble.visible {
+            opacity: 1;
+            transform: translate(-50%, -100%) translateY(0px) scale(1);
+        }
+        #simsThoughtBubble.flip-bottom {
+            transform: translate(-50%, 0%) translateY(-6px) scale(0.86);
+        }
+        #simsThoughtBubble.visible.flip-bottom {
+            transform: translate(-50%, 0%) translateY(0px) scale(1);
+        }
+        #simsThoughtBubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            background: var(--bubble-bg);
+            border: 2.5px solid var(--bubble-border);
+            border-radius: 50%;
+        }
+        #simsThoughtBubble::before {
+            content: '';
+            position: absolute;
+            bottom: -17px;
+            left: calc(50% + 6px);
+            width: 6px;
+            height: 6px;
+            background: var(--bubble-bg);
+            border: 2px solid var(--bubble-border);
+            border-radius: 50%;
+        }
+        #simsThoughtBubble.flip-bottom::after { bottom: auto; top: -10px; }
+        #simsThoughtBubble.flip-bottom::before { bottom: auto; top: -17px; }
+        .bubble-head {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--sims-green);
+            margin-bottom: 2px;
+        }
+
+        /* === КЛЮЧЕВЫЕ АНИМАЦИИ === */
+        @keyframes plumbob3D {
+            0%, 100% { transform: translateY(0) rotateY(0deg) scale(1); filter: drop-shadow(0 0 10px rgba(46,204,113,0.75)); }
+            50% { transform: translateY(-5px) rotateY(180deg) scale(1.1); filter: drop-shadow(0 0 20px rgba(0,168,255,0.95)); }
+        }
+        @keyframes cardEntrance {
+            0% { opacity: 0; transform: translateY(18px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes eqBar {
+            0%, 100% { height: 4px; }
+            50% { height: 14px; }
+        }
+        @keyframes sulsulWave {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.14) rotate(-4deg); }
+            80% { transform: scale(1.06) rotate(4deg); }
+            100% { transform: scale(1); }
+        }
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); transform: translateY(-50%) scale(1); }
+            50% { box-shadow: 0 0 0 9px rgba(239, 68, 68, 0); transform: translateY(-50%) scale(1.12); }
+        }
+
+        /* === КАСТОМНЫЕ ПОЛЗУНКИ === */
+        .sims-slider-wrap { display: flex; flex-direction: column; gap: 6px; }
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .slider-badge {
+            background: linear-gradient(135deg, var(--sims-green), var(--sims-blue));
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 800;
+            box-shadow: 0 2px 8px rgba(46, 204, 113, 0.35);
+        }
+        input[type="range"].sims-range {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 11px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--sims-green) 0%, var(--sims-blue) var(--val, 100%), var(--bg-input) var(--val, 100%));
+            border: 1px solid var(--border);
+            outline: none;
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+        input[type="range"].sims-range:hover { filter: brightness(1.15); }
+        input[type="range"].sims-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 4px solid var(--sims-green);
+            box-shadow: 0 0 12px rgba(46, 204, 113, 0.85);
+            cursor: grab;
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s;
+        }
+        input[type="range"].sims-range::-webkit-slider-thumb:hover {
+            transform: scale(1.22);
+            border-color: var(--sims-blue);
+        }
+
+        /* === ШАПКА === */
+        header {
+            background: var(--bg-header);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 12px 20px;
+            box-shadow: var(--shadow);
+        }
+        .header-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand { display: flex; align-items: center; gap: 14px; }
+        .plumbob-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(46,204,113,0.22), rgba(0,168,255,0.22));
+            border: 1px solid rgba(46,204,113,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.25s;
+        }
+        .plumbob-box:hover { transform: scale(1.08) rotate(5deg); }
+        .plumbob-svg { width: 30px; height: 30px; animation: plumbob3D 3.4s ease-in-out infinite; }
+        .brand-title {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.3px;
+            background: linear-gradient(90deg, var(--sims-green), var(--sims-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .brand-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .author-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            color: #fff;
+            padding: 3px 11px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 3px 10px rgba(253, 29, 29, 0.35);
+            transition: transform 0.2s;
+        }
+        .author-badge:hover { transform: translateY(-1px) scale(1.04); }
+
+        .controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .btn-top {
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-main);
+            padding: 7px 11px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-top:hover { border-color: var(--sims-blue); transform: translateY(-2px); }
+        .btn-top:active { transform: scale(0.95); }
+        .btn-sulsul {
+            background: linear-gradient(135deg, var(--sims-green), var(--sims-green-dark));
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+        }
+        .btn-sulsul.speaking { animation: sulsulWave 0.6s ease; }
+        .btn-music.playing, .btn-tips.active, .btn-sfx.active {
+            border-color: var(--sims-green);
+            background: rgba(46, 204, 113, 0.16);
+            color: var(--sims-green);
+        }
+        .eq-bars {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 14px;
+            width: 14px;
+        }
+        .eq-bars span { width: 3px; height: 4px; background: currentColor; border-radius: 2px; }
+        .btn-music.playing .eq-bars span:nth-child(1) { animation: eqBar 0.5s ease infinite 0.1s; }
+        .btn-music.playing .eq-bars span:nth-child(2) { animation: eqBar 0.5s ease infinite 0.25s; }
+        .btn-music.playing .eq-bars span:nth-child(3) { animation: eqBar 0.5s ease infinite 0.4s; }
+
+        .btn-pip {
+            background: linear-gradient(135deg, var(--sims-blue), var(--sims-blue-dark));
+            color: #fff;
+            border: none;
+        }
+        .lang-group {
+            display: flex;
+            background: var(--bg-input);
+            padding: 3px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+        }
+        .lang-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--sims-green), var(--sims-green-dark));
+            color: #fff;
+        }
+
+        /* === МОДАЛЬНОЕ ОКНО MP3 === */
+        #audioModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(8px);
+            z-index: 9000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #audioModal.open { display: flex; }
+        .modal-card {
+            background: var(--bg-card);
+            border: 2px solid var(--sims-green);
+            border-radius: 24px;
+            max-width: 480px;
+            width: 100%;
+            padding: 22px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+        .modal-card h3 { font-size: 16px; margin-bottom: 8px; color: var(--sims-green); }
+        .modal-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+        .file-row {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+        }
+        .file-row label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-main); }
+        .file-row input[type="file"] { font-size: 11.5px; color: var(--text-muted); width: 100%; }
+
+        /* === КОНТЕЙНЕР И ПАНЕЛИ === */
+        .container {
+            max-width: 1320px;
+            width: 100%;
+            margin: 22px auto;
+            padding: 0 20px;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .quick-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .quick-card:hover { transform: translateY(-3px); border-color: var(--sims-green); }
+        .quick-card small { display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; }
+        .quick-card strong { font-family: Consolas, monospace; font-size: 14px; color: var(--sims-green); }
+
+        .studio-panels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            transform-style: preserve-3d;
+            transition: transform 0.18s ease, border-color 0.2s;
+        }
+        .panel:hover { border-color: rgba(0, 168, 255, 0.5); }
+        .panel-head {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--sims-blue);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .row-flex { display: flex; gap: 8px; margin-bottom: 12px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .label-sm { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+        .input-ui, .select-ui {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 9px 12px;
+            border-radius: 12px;
+            font-size: 12.5px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-ui:focus, .select-ui:focus { border-color: var(--sims-blue); }
+        .btn-action {
+            background: linear-gradient(135deg, var(--sims-green), var(--sims-green-dark));
+            color: #fff;
+            border: none;
+            padding: 9px 16px;
+            border-radius: 12px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.2s, filter 0.2s;
+        }
+        .btn-action:hover { filter: brightness(1.1); transform: scale(1.03); }
+
+        .chips-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 28px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .sim-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 4px 11px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sim-chip:hover { transform: translateY(-1px); border-color: var(--sims-green); }
+        .sim-chip.active {
+            background: rgba(46, 204, 113, 0.18);
+            border-color: var(--sims-green);
+            color: var(--sims-green);
+        }
+        .sim-del {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sim-del:hover { background: #ef4444; color: #fff; }
+
+        .gen-result {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--code-bg);
+            border: 1px solid var(--sims-green);
+            padding: 7px 8px 7px 12px;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+        .gen-result code {
+            flex: 1;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+            color: var(--sims-green);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .money-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .preset-pill {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 3px 9px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .preset-pill:hover { border-color: var(--sims-blue); color: var(--text-main); }
+
+        /* === СТРОКА ПОИСКА + ГОЛОСОВОЙ ПОИСК === */
+        .search-bar { position: relative; margin-bottom: 14px; }
+        .search-bar input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            color: var(--text-main);
+            padding: 14px 54px 14px 46px;
+            border-radius: 999px;
+            font-size: 14px;
+            outline: none;
+            box-shadow: var(--shadow);
+            transition: 0.25s;
+        }
+        .search-bar input:focus {
+            border-color: var(--sims-blue);
+            box-shadow: 0 0 0 4px rgba(0, 168, 255, 0.2);
+        }
+        .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+        .voice-search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-input);
+            color: var(--text-main);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .voice-search-btn:hover { border-color: var(--sims-green); transform: translateY(-50%) scale(1.08); }
+        .voice-search-btn.listening {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+            animation: micPulse 1.1s infinite;
+        }
+
+        .cats-bar { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; align-items: center; }
+        .cat-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .cat-pill:hover { color: var(--text-main); border-color: var(--sims-blue); transform: translateY(-2px); }
+        .cat-pill.active {
+            background: linear-gradient(135deg, var(--sims-blue), var(--sims-blue-dark));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(0, 168, 255, 0.4);
+        }
+        .count-badge {
+            margin-left: auto;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: var(--sims-green);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 999px;
+        }
+
+        /* === СЕТКА КАРТОЧЕК === */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 16px;
+            perspective: 1000px;
+        }
+        .cheat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            animation: cardEntrance 0.3s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+            transform-style: preserve-3d;
+            transition: transform 0.16s ease-out, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .cheat-card:hover {
+            border-color: var(--sims-blue);
+            box-shadow: 0 16px 34px rgba(0, 168, 255, 0.20);
+        }
+        .card-top { height: 74px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .card-emoji {
+            font-size: 32px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .cheat-card:hover .card-emoji { transform: scale(1.25) translateZ(15px) rotate(-6deg); }
+        .cat-tag {
+            position: absolute;
+            top: 9px;
+            left: 11px;
+            background: rgba(10, 15, 28, 0.75);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .sim-inserted-tag {
+            position: absolute;
+            bottom: 6px;
+            right: 10px;
+            background: rgba(46, 204, 113, 0.92);
+            color: #fff;
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-size: 9.5px;
+            font-weight: 800;
+        }
+        .card-content { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .code-display {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 9px 11px;
+            border-radius: 11px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--code-text);
+            margin-bottom: 9px;
+            overflow-x: auto;
+            white-space: nowrap;
+            user-select: all;
+        }
+        .card-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+        .btn-copy {
+            width: 100%;
+            background: linear-gradient(135deg, var(--sims-blue), var(--sims-blue-dark));
+            color: #fff;
+            border: none;
+            padding: 9px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .btn-copy:hover { filter: brightness(1.12); transform: scale(1.02); }
+        .btn-copy:active { transform: scale(0.96); }
+        .btn-copy.copied { background: linear-gradient(135deg, var(--sims-green), var(--sims-green-dark)) !important; }
+
+        /* === КНОПКА НАВЕРХ, ПОДВАЛ И ТОСТ === */
+        #scrollTopBtn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--sims-green), var(--sims-blue));
+            color: #fff;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 168, 255, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(15px);
+            transition: all 0.25s ease;
+            z-index: 999;
+        }
+        #scrollTopBtn.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+        footer {
+            margin-top: 40px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-header);
+            padding: 22px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .footer-inner { max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .footer-credit { font-size: 14px; font-weight: 800; color: var(--text-main); }
+        .insta-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            color: #fff;
+            padding: 7px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(253, 29, 29, 0.35);
+            transition: transform 0.2s;
+        }
+        .insta-link:hover { transform: scale(1.06); }
+
+        #toastBox {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, var(--sims-green), var(--sims-green-dark));
+            color: #fff;
+            padding: 12px 22px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 800;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 9999;
+        }
+        #toastBox.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<!-- === 1. ЖИВАЯ АНИМАЦИЯ ФОНА + МНОГОСЛОЙНЫЙ 3D ПАРАЛЛАКС === -->
+<div class="parallax-scene" id="parallaxScene">
+    <div class="animated-aurora"></div>
+    <div class="parallax-layer" data-depth="0.025" id="pLayer1">
+        <div class="p-orb" style="width:420px; height:420px; background:#2ecc71; top:6%; left:4%;"></div>
+        <div class="p-orb" style="width:460px; height:460px; background:#00a8ff; top:52%; left:70%; animation-delay:-3s;"></div>
+        <div class="p-orb" style="width:340px; height:340px; background:#a855f7; top:74%; left:16%; animation-delay:-5s;"></div>
+    </div>
+    <div class="parallax-layer" data-depth="0.055" id="pLayer2"></div>
+    <div class="parallax-layer" data-depth="0.095" id="pLayer3"></div>
+</div>
+
+<!-- Постоянный поток взлетающих кристаллов -->
+<div class="bg-particles" id="bgParticles"></div>
+
+<!-- === 2. ГИБКОЕ НЕПЕРЕКРЫВАЮЩЕЕ ОБЛАЧКО МЫСЛЕЙ SIMS === -->
+<div id="simsThoughtBubble">
+    <div class="bubble-head">💎 <span id="bubbleTitle">Мысли Сима</span></div>
+    <div id="bubbleText">Описание</div>
+</div>
+
+<!-- === 3. МОДАЛЬНОЕ ОКНО ДЛЯ ЗАГРУЗКИ ВАШИХ 2 АУДИОФАЙЛОВ === -->
+<div id="audioModal">
+    <div class="modal-card">
+        <h3>🎵 Ваши аудиофайлы («Сул-Сул» и «Music»)</h3>
+        <p>
+            Положите рядом с программой ваши файлы под именами <b>sulsul.mp3</b> (или <b>sims-4-very-happy.mp3</b>) и <b>music.mp3</b> (или <b>the_sims_4_09. Ilan Eshkeri - August.mp3</b>), либо выберите их один раз ниже — программа запомнит их навсегда!
+        </p>
+        <div class="file-row">
+            <label>1. Ваш файл «Сул-Сул» (при открытии):</label>
+            <input type="file" id="sulsulFileInput" accept="audio/*">
+        </div>
+        <div class="file-row">
+            <label>2. Ваша песня «Music» (играет сразу после «Сул-Сул»):</label>
+            <input type="file" id="musicFileInput" accept="audio/*">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+            <button type="button" class="btn-top" id="closeModalBtn">Готово</button>
+        </div>
+    </div>
+</div>
+
+<header>
+    <div class="header-inner">
+        <div class="brand">
+            <div class="plumbob-box" id="plumbobLogo" data-tip="tip_sulsul">
+                <svg class="plumbob-svg" viewBox="0 0 64 100" fill="none">
+                    <polygon points="32,2 60,50 32,98 4,50" fill="#2ecc71"/>
+                    <polygon points="32,2 60,50 32,50" fill="#58d68d"/>
+                    <polygon points="32,2 4,50 32,50" fill="#28b463"/>
+                    <polygon points="32,98 60,50 32,50" fill="#1d8348"/>
+                    <polygon points="32,98 4,50 32,50" fill="#239b56"/>
+                </svg>
+            </div>
+            <div>
+                <div class="brand-title" id="ui-title">Шпаргалка The Sims 4 PRO</div>
+                <div class="brand-sub">
+                    <span id="ui-author-top">Сделано Эмином Миркеримовым</span>
+                    <a href="https://www.instagram.com/emin.mirkarimov" target="_blank" class="author-badge">
+                        📸 @emin.mirkarimov
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button type="button" class="btn-top btn-sulsul" id="sulsulBtn" data-tip="tip_sulsul">
+                🗣️ <span>Сул-Сул!</span>
+            </button>
+            <button type="button" class="btn-top btn-music" id="musicBtn" data-tip="tip_music">
+                <div class="eq-bars"><span></span><span></span><span></span></div>
+                <span id="ui-music">Музыка</span>
+            </button>
+            <button type="button" class="btn-top btn-sfx active" id="sfxBtn" data-tip="tip_sfx">
+                🔊 <span id="ui-sfx">Звуки кнопок</span>
+            </button>
+            <button type="button" class="btn-top" id="openAudioModalBtn" data-tip="tip_audio_files">
+                📂 <span>MP3</span>
+            </button>
+            <button type="button" class="btn-top btn-tips active" id="tipsBtn" data-tip="tip_bubbles">
+                💭 <span id="ui-tips">Облачка: ВКЛ</span>
+            </button>
+            <button type="button" class="btn-top" id="themeBtn" data-tip="tip_theme">
+                🌙 <span id="ui-theme">Темная</span>
+            </button>
+            <button type="button" class="btn-top btn-pip" id="pipBtn" data-tip="tip_pip">
+                📌 <span id="ui-pip">Поверх окон</span>
+            </button>
+            <div class="lang-group" data-tip="tip_lang">
+                <button type="button" class="lang-btn active" data-lang="ru">RU</button>
+                <button type="button" class="lang-btn" data-lang="az">AZ</button>
+                <button type="button" class="lang-btn" data-lang="tr">TR</button>
+                <button type="button" class="lang-btn" data-lang="en">EN</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <!-- Быстрые главные коды -->
+    <div class="quick-grid">
+        <div class="quick-card" data-tip="tip_console">
+            <div>
+                <small id="ui-q1">1. Открыть консоль в игре</small>
+                <strong>Ctrl + Shift + C</strong>
+            </div>
+        </div>
+        <div class="quick-card" data-tip="tip_dev">
+            <div>
+                <small id="ui-q2">2. Главный код разработчика</small>
+                <strong>testingcheats true</strong>
+            </div>
+            <button type="button" class="btn-copy js-copy-btn" data-copy="testingcheats true" style="width:auto; padding:8px 14px;">📋</button>
+        </div>
+        <div class="quick-card" data-tip="tip_cas">
+            <div>
+                <small id="ui-q3">3. Полный редактор персонажа (CAS)</small>
+                <strong>cas.fulleditmode</strong>
+            </div>
+            <button type="button" class="btn-copy js-copy-btn" data-copy="cas.fulleditmode" style="width:auto; padding:8px 14px;">📋</button>
+        </div>
+    </div>
+
+    <!-- Студийные панели с ползунками и генераторами -->
+    <div class="studio-panels">
+        <!-- Панель 1: Менеджер персонажей + Ползунок Отношений + Генератор всех Карьер -->
+        <div class="panel js-tilt-panel">
+            <div class="panel-head">
+                <span id="ui-sims-head">👤 Мои персонажи, Отношения и Генератор Карьер</span>
+            </div>
+            <div class="row-flex" data-tip="tip_sim_add">
+                <input type="text" id="simNameInput" class="input-ui" placeholder="Имя и Фамилия (напр. Белла Гот)">
+                <button type="button" class="btn-action" id="addSimBtn">➕ Добавить</button>
+            </div>
+            <div class="grid-2" data-tip="tip_sim_select">
+                <div>
+                    <label class="label-sm" id="ui-sim1-lbl">Сим 1 (Основной):</label>
+                    <select id="sim1Select" class="select-ui"></select>
+                </div>
+                <div>
+                    <label class="label-sm" id="ui-sim2-lbl">Сим 2 (Для отношений):</label>
+                    <select id="sim2Select" class="select-ui"></select>
+                </div>
+            </div>
+            <div class="chips-wrap" id="simChipsBox" data-tip="tip_sim_chips"></div>
+
+            <div class="sims-slider-wrap" data-tip="tip_rel_slider" style="margin-bottom: 14px;">
+                <div class="slider-header">
+                    <span id="ui-rel-slider-lbl">❤️ Сила отношений в кодах:</span>
+                    <span class="slider-badge" id="relBadge">+100</span>
+                </div>
+                <input type="range" id="relRange" class="sims-range" min="-100" max="100" step="5" value="100">
+            </div>
+
+            <!-- Генератор 36 карьер и 2 школьных ступеней -->
+            <div class="grid-2" data-tip="tip_career_gen" style="margin-bottom: 6px;">
+                <div>
+                    <label class="label-sm" id="ui-career-lbl">💼 Выберите карьеру или школу (38):</label>
+                    <select id="careerSelect" class="select-ui"></select>
+                </div>
+                <div>
+                    <label class="label-sm" id="ui-career-act-lbl">Действие с карьерой:</label>
+                    <select id="careerActionSelect" class="select-ui">
+                        <option value="promote">⬆️ Повысить (promote)</option>
+                        <option value="add_career">➕ Устроить (add_career)</option>
+                        <option value="demote">⬇️ Понизить (demote)</option>
+                        <option value="remove_career">✕ Уволить (remove_career)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="gen-result" style="border-color:#a855f7;">
+                <code id="careerCodeOut" style="color:#c084fc;">careers.promote Business</code>
+                <button type="button" class="btn-copy js-copy-btn" id="copyCareerBtn" data-copy="careers.promote Business" style="width:auto; padding:7px 14px;">📋</button>
+            </div>
+        </div>
+
+        <!-- Панель 2: Генератор 62 навыков и точного баланса денег -->
+        <div class="panel js-tilt-panel">
+            <div class="panel-head">
+                <span id="ui-gen-head">⚡ Генератор всех 62 навыков и бюджета (ползунки)</span>
+            </div>
+
+            <div style="margin-bottom: 12px;" data-tip="tip_skill_select">
+                <label class="label-sm" id="ui-skill-lbl">Выберите навык (Взрослые, Дети, Малыши, Дополнения):</label>
+                <select id="skillSelect" class="select-ui"></select>
+            </div>
+
+            <div class="sims-slider-wrap" style="margin-bottom: 10px;" data-tip="tip_skill_slider">
+                <div class="slider-header">
+                    <span id="ui-lvl-lbl">Уровень навыка:</span>
+                    <span class="slider-badge" id="skillBadge">10 / 10 MAX</span>
+                </div>
+                <input type="range" id="skillLvlInput" class="sims-range" min="1" max="10" value="10">
+            </div>
+
+            <div class="gen-result" data-tip="tip_skill_result">
+                <code id="skillCodeOut">stats.set_skill_level Major_HomestyleCooking 10</code>
+                <button type="button" class="btn-copy js-copy-btn" id="copySkillBtn" data-copy="stats.set_skill_level Major_HomestyleCooking 10" style="width:auto; padding:7px 14px;">📋</button>
+            </div>
+
+            <div class="sims-slider-wrap" style="margin-top: 14px;" data-tip="tip_money_slider">
+                <div class="slider-header">
+                    <span id="ui-money-lbl">💰 Точный баланс семьи:</span>
+                    <span class="slider-badge" id="moneyBadge">500 000 §</span>
+                </div>
+                <input type="range" id="moneyInput" class="sims-range" min="0" max="9999999" step="5000" value="500000">
+                <div class="money-presets">
+                    <button type="button" class="preset-pill" data-money="50000">50 000 §</button>
+                    <button type="button" class="preset-pill" data-money="250000">250 000 §</button>
+                    <button type="button" class="preset-pill" data-money="1000000">1 000 000 §</button>
+                    <button type="button" class="preset-pill" data-money="9999999">9 999 999 § (MAX)</button>
+                </div>
+            </div>
+
+            <div class="gen-result" style="margin-top:8px; border-color: var(--sims-blue);" data-tip="tip_money_result">
+                <code id="moneyCodeOut" style="color:var(--sims-blue);">Money 500000</code>
+                <button type="button" class="btn-copy js-copy-btn" id="copyMoneyBtn" data-copy="Money 500000" style="width:auto; padding:7px 14px;">📋</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Поиск с Голосовым вводом и категории -->
+    <div class="search-bar" data-tip="tip_search">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Поиск по всем кодам, навыкам, карьерам, призракам, деньгам...">
+        <button type="button" class="voice-search-btn" id="voiceSearchBtn" data-tip="tip_voice" title="Голосовой поиск">🎙️</button>
+    </div>
+    <div class="cats-bar" id="catsBar" data-tip="tip_cats"></div>
+
+    <!-- Сетка карточек -->
+    <div class="cards-grid" id="cardsGrid"></div>
+</div>
+
+<button type="button" id="scrollTopBtn" title="Наверх">⬆️</button>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-credit" id="ui-footer-author">Сделано Эмином Миркеримовым (Created by Emin Mirkarimov)</div>
+        <a href="https://www.instagram.com/emin.mirkarimov" target="_blank" class="insta-link">
+            📸 Instagram: @emin.mirkarimov
+        </a>
+    </div>
+</footer>
+
+<div id="toastBox">✅ Код скопирован!</div>
+
+<!-- Плееры строго для ваших двух файлов -->
+<audio id="customSulSulAudio" preload="auto"></audio>
+<audio id="customMusicAudio" loop preload="auto"></audio>
+
+<script>
+(function() {
+    /* === 1. ГЕНЕРАЦИЯ ПАРЯЩИХ КРИСТАЛЛОВ И 3D ПАРАЛЛАКСА === */
+    var pBox = document.getElementById('bgParticles');
+    if (pBox) {
+        var pHtml = '';
+        for (var p = 0; p < 16; p++) {
+            var left = Math.floor(Math.random() * 96) + 2;
+            var dur = (Math.random() * 13 + 11).toFixed(1);
+            var del = (Math.random() * 12).toFixed(1);
+            var size = Math.floor(Math.random() * 13) + 10;
+            pHtml += '<div class="particle" style="left:' + left + '%; width:' + size + 'px; height:' + Math.floor(size * 1.65) + 'px; animation-duration:' + dur + 's; animation-delay:-' + del + 's;"></div>';
+        }
+        pBox.innerHTML = pHtml;
+    }
+
+    var l2 = document.getElementById('pLayer2');
+    var l3 = document.getElementById('pLayer3');
+    var plumbobSvgStr = '<svg viewBox="0 0 64 100" width="100%" height="100%"><polygon points="32,2 60,50 32,98 4,50" fill="#2ecc71"/><polygon points="32,2 60,50 32,50" fill="#58d68d"/><polygon points="32,98 60,50 32,50" fill="#1d8348"/></svg>';
+
+    if (l2 && l3) {
+        var h2 = '', h3 = '';
+        for (var i = 0; i < 8; i++) {
+            var top = (i * 13 + 6) % 92;
+            var left = (i * 29 + 8) % 92;
+            var sz = 28 + (i % 3) * 14;
+            h2 += '<div class="p-plumbob" style="top:' + top + '%; left:' + left + '%; width:' + sz + 'px; height:' + Math.round(sz * 1.5) + 'px; animation-delay:-' + (i * 1.2) + 's;">' + plumbobSvgStr + '</div>';
+        }
+        for (var j = 0; j < 10; j++) {
+            var top3 = (j * 17 + 12) % 94;
+            var left3 = (j * 23 + 4) % 94;
+            var sz3 = 15 + (j % 3) * 8;
+            h3 += '<div class="p-plumbob" style="top:' + top3 + '%; left:' + left3 + '%; width:' + sz3 + 'px; height:' + Math.round(sz3 * 1.5) + 'px; animation-delay:-' + (j * 0.8) + 's;">' + plumbobSvgStr + '</div>';
+        }
+        l2.innerHTML = h2;
+        l3.innerHTML = h3;
+    }
+
+    var mouseX = 0, mouseY = 0, scrollY = 0;
+    var layers = document.querySelectorAll('.parallax-layer');
+    function updateParallax() {
+        for (var i = 0; i < layers.length; i++) {
+            var depth = parseFloat(layers[i].getAttribute('data-depth')) || 0.03;
+            var moveX = (mouseX * depth * 130).toFixed(1);
+            var moveY = (mouseY * depth * 130 - scrollY * depth * 3.5).toFixed(1);
+            layers[i].style.transform = 'translate3d(' + moveX + 'px, ' + moveY + 'px, 0)';
+        }
+    }
+    window.addEventListener('mousemove', function(e) {
+        mouseX = (e.clientX / window.innerWidth) - 0.5;
+        mouseY = (e.clientY / window.innerHeight) - 0.5;
+        requestAnimationFrame(updateParallax);
+    });
+    window.addEventListener('scroll', function() {
+        scrollY = window.pageYOffset || document.documentElement.scrollTop;
+        requestAnimationFrame(updateParallax);
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        var card = e.target.closest('.cheat-card, .js-tilt-panel');
+        if (!card) return;
+        var rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var rotY = (((x / rect.width) - 0.5) * 6.5).toFixed(2);
+        var rotX = (((0.5 - (y / rect.height)) * 6.5)).toFixed(2);
+        card.style.transform = 'perspective(900px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateY(-4px)';
+    });
+    document.addEventListener('mouseout', function(e) {
+        var card = e.target.closest('.cheat-card, .js-tilt-panel');
+        if (card && !card.contains(e.relatedTarget)) card.style.transform = '';
+    });
+
+    /* === 2. ХРАНИЛИЩЕ НАСТРОЕК === */
+    var SafeStore = {
+        set: function(key, val) {
+            var str = JSON.stringify(val);
+            try { window.localStorage.setItem('s4pro_' + key, str); } catch (e) {}
+            try {
+                var d = new Date();
+                d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+                document.cookie = 's4pro_' + key + '=' + encodeURIComponent(str) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+            } catch (e) {}
+        },
+        get: function(key, defVal) {
+            try {
+                var item = window.localStorage.getItem('s4pro_' + key);
+                if (item !== null) return JSON.parse(item);
+            } catch (e) {}
+            try {
+                var m = document.cookie.match(new RegExp('(^| )s4pro_' + key + '=([^;]+)'));
+                if (m) return JSON.parse(decodeURIComponent(m[2]));
+            } catch (e) {}
+            return defVal;
+        }
+    };
+
+    var AudioDB = {
+        open: function(cb) {
+            if (!window.indexedDB) return cb(null);
+            try {
+                var req = window.indexedDB.open('Sims4CheatAudioDB', 1);
+                req.onupgradeneeded = function(e) { e.target.result.createObjectStore('files'); };
+                req.onsuccess = function(e) { cb(e.target.result); };
+                req.onerror = function() { cb(null); };
+            } catch (e) { cb(null); }
+        },
+        saveFile: function(key, blob) {
+            this.open(function(db) {
+                if (!db) return;
+                try { db.transaction('files', 'readwrite').objectStore('files').put(blob, key); } catch (e) {}
+            });
+        },
+        loadFile: function(key, cb) {
+            this.open(function(db) {
+                if (!db) return cb(null);
+                try {
+                    var req = db.transaction('files', 'readonly').objectStore('files').get(key);
+                    req.onsuccess = function() { cb(req.result || null); };
+                    req.onerror = function() { cb(null); };
+                } catch (e) { cb(null); }
+            });
+        }
+    };
+
+    /* === 3. ЗВУКОВОЙ ДВИЖОК: ТОЛЬКО ВАШИ MP3 + ЗВУКИ КНОПОК В СТИЛЕ SIMS 4 === */
+    var sulsulEl = document.getElementById('customSulSulAudio');
+    var musicEl = document.getElementById('customMusicAudio');
+    var sfxOn = SafeStore.get('sfxOn', true);
+
+    var sulsulCandidates = ['sulsul.mp3', 'sims-4-very-happy.mp3', '2.mp3'];
+    var sulsulTryIdx = 0;
+    var hasSulSulBlob = false;
+    var pendingSulSulCallback = null;
+    var wantPlaySulSul = false;
+
+    var musicCandidates = ['music.mp3', 'the_sims_4_09. Ilan Eshkeri - August.mp3', '1.mp3'];
+    var musicTryIdx = 0;
+    var hasMusicBlob = false;
+    var wantPlayMusic = false;
+
+    sulsulEl.addEventListener('error', function() {
+        if (hasSulSulBlob) return;
+        sulsulTryIdx++;
+        if (sulsulTryIdx < sulsulCandidates.length) {
+            sulsulEl.src = sulsulCandidates[sulsulTryIdx];
+            if (wantPlaySulSul) sulsulEl.play().catch(function(){});
+        } else if (typeof pendingSulSulCallback === 'function') {
+            var cb = pendingSulSulCallback;
+            pendingSulSulCallback = null;
+            cb();
+        }
+    });
+
+    sulsulEl.addEventListener('ended', function() {
+        wantPlaySulSul = false;
+        if (typeof pendingSulSulCallback === 'function') {
+            var cb = pendingSulSulCallback;
+            pendingSulSulCallback = null;
+            cb();
+        }
+    });
+
+    musicEl.addEventListener('error', function() {
+        if (hasMusicBlob) return;
+        musicTryIdx++;
+        if (musicTryIdx < musicCandidates.length) {
+            musicEl.src = musicCandidates[musicTryIdx];
+            if (wantPlayMusic && AudioEngine.isPlayingMusic) {
+                musicEl.volume = 0.65;
+                musicEl.play().catch(function(){});
+            }
+        }
+    });
+
+    AudioDB.loadFile('sulsulBlob', function(blob) {
+        if (blob) {
+            hasSulSulBlob = true;
+            sulsulEl.src = URL.createObjectURL(blob);
+            if (wantPlaySulSul) sulsulEl.play().catch(function(){});
+        } else {
+            sulsulEl.src = sulsulCandidates[0];
+        }
+    });
+
+    AudioDB.loadFile('musicBlob', function(blob) {
+        if (blob) {
+            hasMusicBlob = true;
+            musicEl.src = URL.createObjectURL(blob);
+            if (wantPlayMusic && AudioEngine.isPlayingMusic) {
+                musicEl.volume = 0.65;
+                musicEl.play().catch(function(){});
+            }
+        } else {
+            musicEl.src = musicCandidates[0];
+        }
+    });
+
+    var lastTickTime = 0;
+
+    var AudioEngine = {
+        ctx: null,
+        isPlayingMusic: false,
+
+        initCtx: function() {
+            if (!this.ctx) {
+                var AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+        },
+
+        // 1. Звук обычного клика по кнопке в стиле интерфейса Sims 4 (глянцевый поп-клик)
+        playUIClick: function() {
+            if (!sfxOn) return;
+            try {
+                this.initCtx();
+                if (!this.ctx) return;
+                var now = this.ctx.currentTime;
+                var osc = this.ctx.createOscillator();
+                var gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(760, now + 0.065);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } catch (e) {}
+        },
+
+        // 2. Звук переключения категории / вкладки в стиле Sims 4
+        playUITab: function() {
+            if (!sfxOn) return;
+            try {
+                this.initCtx();
+                if (!this.ctx) return;
+                var now = this.ctx.currentTime;
+                var osc = this.ctx.createOscillator();
+                var gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08);
+                gain.gain.setValueAtTime(0.07, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.095);
+            } catch (e) {}
+        },
+
+        // 3. Звук копирования кода (кристальный двойной перелив выполненного желания Sims 4)
+        playUICopy: function() {
+            if (!sfxOn) return;
+            try {
+                this.initCtx();
+                if (!this.ctx) return;
+                var now = this.ctx.currentTime;
+                var notes = [587.33, 880.00, 1174.66];
+                for (var i = 0; i < notes.length; i++) {
+                    var osc = this.ctx.createOscillator();
+                    var gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    var t0 = now + i * 0.045;
+                    osc.frequency.setValueAtTime(notes[i], t0);
+                    gain.gain.setValueAtTime(0.08, t0);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.18);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(t0);
+                    osc.stop(t0 + 0.19);
+                }
+            } catch (e) {}
+        },
+
+        // 4. Звук удаления / закрытия
+        playUIDelete: function() {
+            if (!sfxOn) return;
+            try {
+                this.initCtx();
+                if (!this.ctx) return;
+                var now = this.ctx.currentTime;
+                var osc = this.ctx.createOscillator();
+                var gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(480, now);
+                osc.frequency.exponentialRampToValueAtTime(240, now + 0.09);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.11);
+            } catch (e) {}
+        },
+
+        // 5. Мягкий тик ползунка Sims 4
+        playSliderTick: function() {
+            if (!sfxOn) return;
+            var nowMs = Date.now();
+            if (nowMs - lastTickTime < 45) return;
+            lastTickTime = nowMs;
+            try {
+                this.initCtx();
+                if (!this.ctx) return;
+                var now = this.ctx.currentTime;
+                var osc = this.ctx.createOscillator();
+                var gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(620, now);
+                osc.frequency.exponentialRampToValueAtTime(780, now + 0.025);
+                gain.gain.setValueAtTime(0.035, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.035);
+            } catch (e) {}
+        },
+
+        saySulSul: function(onEndedCallback) {
+            var btn = document.getElementById('sulsulBtn');
+            if (btn) {
+                btn.classList.remove('speaking');
+                void btn.offsetWidth;
+                btn.classList.add('speaking');
+            }
+            if (typeof onEndedCallback === 'function') {
+                pendingSulSulCallback = onEndedCallback;
+            }
+            wantPlaySulSul = true;
+            try {
+                sulsulEl.currentTime = 0;
+                var p = sulsulEl.play();
+                if (p !== undefined) p.catch(function() {});
+            } catch (e) {}
+        },
+
+        startMusic: function() {
+            this.isPlayingMusic = true;
+            wantPlayMusic = true;
+            SafeStore.set('musicOn', true);
+            this.updateMusicUI();
+            try {
+                musicEl.volume = 0.65;
+                var p = musicEl.play();
+                if (p !== undefined) p.catch(function() {});
+            } catch (e) {}
+        },
+
+        stopMusic: function() {
+            this.isPlayingMusic = false;
+            wantPlayMusic = false;
+            SafeStore.set('musicOn', false);
+            try { musicEl.pause(); } catch (e) {}
+            this.updateMusicUI();
+        },
+
+        toggleMusic: function() {
+            if (this.isPlayingMusic) this.stopMusic();
+            else this.startMusic();
+        },
+
+        updateMusicUI: function() {
+            var btn = document.getElementById('musicBtn');
+            var lbl = document.getElementById('ui-music');
+            var t = I18N[lang];
+            if (!btn || !lbl) return;
+            btn.classList.toggle('playing', this.isPlayingMusic);
+            lbl.textContent = this.isPlayingMusic ? t.musicOn : t.musicOff;
+        }
+    };
+
+    /* === 4. ПЕРЕВОДЫ НА 4 ЯЗЫКА === */
+    var I18N = {
+        ru: {
+            title: "Шпаргалка The Sims 4 PRO",
+            authorTop: "Сделано Эмином Миркеримовым",
+            authorFooter: "Сделано Эмином Миркеримовым • Полная база всех кодов The Sims 4",
+            musicOn: "Музыка: ВКЛ",
+            musicOff: "Музыка: ВЫКЛ",
+            sfxOn: "Звуки: ВКЛ",
+            sfxOff: "Звуки: ВЫКЛ",
+            tipsOn: "Облачка: ВКЛ",
+            tipsOff: "Облачка: ВЫКЛ",
+            themeDark: "Темная",
+            themeLight: "Светлая",
+            pip: "Поверх окон",
+            q1: "1. Открыть консоль в игре",
+            q2: "2. Главный код разработчика",
+            q3: "3. Полный редактор персонажа (CAS)",
+            simsHead: "👤 Мои персонажи, Отношения и Генератор всех Карьер",
+            simPlaceholder: "Имя и Фамилия (напр. Белла Гот)",
+            addBtn: "➕ Добавить",
+            sim1Lbl: "Сим 1 (Основной):",
+            sim2Lbl: "Сим 2 (Для отношений):",
+            relSliderLbl: "❤️ Сила отношений в кодах:",
+            careerLbl: "💼 Выберите карьеру или школу (38):",
+            careerActLbl: "Действие с карьерой:",
+            noSims: "Список пуст — добавьте имя своего сима выше",
+            defSim1: "Имя Фамилия",
+            defSim2: "Имя2 Фамилия2",
+            genHead: "⚡ Генератор всех 62 навыков и бюджета (ползунки)",
+            skillLbl: "Выберите навык из списка (62 записи):",
+            lvlLbl: "Уровень навыка:",
+            moneyLbl: "💰 Точный баланс семьи:",
+            search: "Поиск по всем кодам, навыкам, карьерам, призракам или нажмите 🎙️...",
+            allCat: "Все коды",
+            foundLbl: "Кодов в базе:",
+            copy: "Скопировать",
+            copied: "Скопировано!",
+            simTag: "👤 Имя подставлено",
+            bubbleHeader: "Мысли Сима",
+            voiceListen: "🎙️ Говорите...",
+            tips: {
+                tip_sulsul: "Воспроизводит ваш аудиофайл «Сул-Сул!».",
+                tip_music: "Включает или выключает вашу фоновую песню.",
+                tip_sfx: "Включает или отключает фирменные звуки Sims 4 при нажатии на кнопки и ползунки.",
+                tip_audio_files: "Выберите ваши MP3-файлы «Сул-Сул» и «Music», чтобы сохранить их в память.",
+                tip_bubbles: "Включает или отключает эти всплывающие облачка-подсказки.",
+                tip_theme: "Переключает темную и светлую тему с анимацией фона.",
+                tip_pip: "Открывает компактное окно программы поверх других окон.",
+                tip_lang: "Мгновенно переводит интерфейс, коды и облачка на 4 языка.",
+                tip_console: "Нажмите эти 3 клавиши в игре, чтобы открыть строку ввода кодов.",
+                tip_dev: "Базовый код! Введите его первым, чтобы заработали остальные читы.",
+                tip_cas: "Открывает полное изменение внешности, тела и характера сима.",
+                tip_sim_add: "Впишите Имя и Фамилию вашего сима — он сохранится в памяти.",
+                tip_sim_select: "Выбранные здесь имена сами подставляются в коды отношений и перезагрузки!",
+                tip_sim_chips: "Ваши сохраненные симы: кликните для выбора или нажмите ✕ для удаления.",
+                tip_rel_slider: "Ползунок от -100 (Враги) до +100 (Любовь/Дружба) меняет цифры прямо в кодах!",
+                tip_career_gen: "Выберите один из 36 карьерных путей или 2 школьных уровня, чтобы повысить, устроить или уволить сима!",
+                tip_skill_select: "Полный список из 62 записей навыков: взрослые, дети, малыши и дополнения.",
+                tip_skill_slider: "Выставьте уровень навыка (максимум 10, 5 или 3 подстраивается автоматически).",
+                tip_skill_result: "Готовый код навыка — скопируйте в 1 клик!",
+                tip_money_slider: "Выставьте любую сумму от 0 до 9 999 999 § или нажмите быструю кнопку.",
+                tip_money_result: "Готовый код на точную сумму денег семьи.",
+                tip_search: "Введите слово или нажмите микрофон справа для голосового поиска.",
+                tip_voice: "Нажмите и скажите название кода или категории голосом!",
+                tip_cats: "Фильтрация полной энциклопедии кодов по игровым категориям."
+            }
+        },
+        az: {
+            title: "The Sims 4 PRO Şparqalka",
+            authorTop: "Emin Mirkarimov tərəfindən hazırlanıb",
+            authorFooter: "Emin Mirkarimov tərəfindən hazırlanıb • Bütün Sims 4 kodlarının tam bazası",
+            musicOn: "Musiqi: AÇIQ",
+            musicOff: "Musiqi: BAĞLI",
+            sfxOn: "Səslər: AÇIQ",
+            sfxOff: "Səslər: BAĞLI",
+            tipsOn: "Buludlar: AÇIQ",
+            tipsOff: "Buludlar: BAĞLI",
+            themeDark: "Qaranlıq",
+            themeLight: "İşıqlı",
+            pip: "Pəncərə üstündə",
+            q1: "1. Oyunda konsolu açmaq",
+            q2: "2. Əsas tərtibatçı kodu",
+            q3: "3. Tam personaj redaktoru (CAS)",
+            simsHead: "👤 Personajlarım, Münasibətlər və Karyera Generatoru",
+            simPlaceholder: "Ad və Soyad (məs: Bella Qot)",
+            addBtn: "➕ Əlavə et",
+            sim1Lbl: "Sim 1 (Əsas):",
+            sim2Lbl: "Sim 2 (Münasibət üçün):",
+            relSliderLbl: "❤️ Kodlarda münasibət səviyyəsi:",
+            careerLbl: "💼 İstənilən karyeranı seçin (36):",
+            careerActLbl: "Karyera əməliyyatı:",
+            noSims: "Siyahı boşdur — yuxarıda siminizin adını əlavə edin",
+            defSim1: "Ad Soyad",
+            defSim2: "Ad2 Soyad2",
+            genHead: "⚡ Bütün 62 bacarıq və büdcə generatoru",
+            skillLbl: "Bacarıq seçin (62 qeyd):",
+            lvlLbl: "Bacarıq səviyyəsi:",
+            moneyLbl: "💰 Dəqiq ailə balansı:",
+            search: "Bütün kodlar, bacarıqlar, karyera üzrə axtarış və ya 🎙️...",
+            allCat: "Bütün kodlar",
+            foundLbl: "Cəmi kod:",
+            copy: "Kopyala",
+            copied: "Kopyalandı!",
+            simTag: "👤 Ad əlavə edildi",
+            bubbleHeader: "Sim Düşüncəsi",
+            voiceListen: "🎙️ Danışın...",
+            tips: {
+                tip_sulsul: "Sizin «Sul Sul!» audio faylınızı səsləndirir.",
+                tip_music: "Sizin arxa fon mahnınızı yandırır və ya söndürür.",
+                tip_sfx: "Düymələrə basdıqda Sims 4 interfeys səslərini açıb-bağlayır.",
+                tip_audio_files: "Öz MP3 musiqi və salam fayllarınızı qoşun.",
+                tip_bubbles: "Sims üslubunda izahlı düşüncə buludlarını açıb-bağlayır.",
+                tip_theme: "Qaranlıq və işıqlı mövzu arasında keçid edir.",
+                tip_pip: "Şparqalkanı digər pəncərələrin üstündə açır.",
+                tip_lang: "İnterfeysi və izahları 4 dilə tərcümə edir.",
+                tip_console: "Oyunda kod sətirini açmaq üçün bu 3 düyməni basın.",
+                tip_dev: "Digər kodların işləməsi üçün ilk olaraq bunu daxil edin.",
+                tip_cas: "Simlərin görünüşünü və xarakterini tam dəyişməyi açır.",
+                tip_sim_add: "Siminizin Ad və Soyadını əlavə edin — yaddaşda qalacaq.",
+                tip_sim_select: "Seçilmiş adlar münasibət kodlarına avtomatik yazılır!",
+                tip_sim_chips: "Yadda saxlanılan simlər: seçmək üçün adına, silmək üçün ✕ basın.",
+                tip_rel_slider: "-100 (Düşmən) ilə +100 (Sevgi/Dostluq) arasında sürüşdürün.",
+                tip_career_gen: "36 karyeradan birini seçib vəzifəni artırın və ya işə düzəldin!",
+                tip_skill_select: "Oyundakı 62 bacarıq qeydinin tam siyahısı.",
+                tip_skill_slider: "Bacarıq səviyyəsini təyin edin.",
+                tip_skill_result: "Seçilmiş bacarıq üçün hazır kod!",
+                tip_money_slider: "Ailə büdcəsini 0-dan 9.999.999 §-a qədər seçin.",
+                tip_money_result: "Dəqiq pul məbləği üçün hazır kod.",
+                tip_search: "Açar söz yazın və ya sağdakı mikrofonla səsli axtarın.",
+                tip_voice: "Mikrofona klikləyin və axtardığınız kodu səslə deyin!",
+                tip_cats: "Kateqoriyalar üzrə sürətli filtr."
+            }
+        },
+        tr: {
+            title: "The Sims 4 PRO Hile Rehberi",
+            authorTop: "Emin Mirkarimov tarafından yapıldı",
+            authorFooter: "Emin Mirkarimov tarafından yapıldı • Tüm Sims 4 Hileleri Ansiklopedisi",
+            musicOn: "Müzik: AÇIK",
+            musicOff: "Müzik: KAPALI",
+            sfxOn: "Sesler: AÇIK",
+            sfxOff: "Sesler: KAPALI",
+            tipsOn: "Baloncuk: AÇIK",
+            tipsOff: "Baloncuk: KAPALI",
+            themeDark: "Koyu",
+            themeLight: "Açık",
+            pip: "Pencere Üstte",
+            q1: "1. Oyun konsolunu aç",
+            q2: "2. Ana geliştirici kodu",
+            q3: "3. Tam karakter düzenleyici (CAS)",
+            simsHead: "👤 Karakterlerim, İlişkiler ve Kariyer Oluşturucu",
+            simPlaceholder: "İsim ve Soyisim (örn: Bella Goth)",
+            addBtn: "➕ Ekle",
+            sim1Lbl: "Sim 1 (Ana Karakter):",
+            sim2Lbl: "Sim 2 (İlişkiler İçin):",
+            relSliderLbl: "❤️ Kodlardaki İlişki Seviyesi:",
+            careerLbl: "💼 Kariyer veya okul seçin (38):",
+            careerActLbl: "Kariyer işlemi:",
+            noSims: "Liste boş — yukarıdan siminizin adını ekleyin",
+            defSim1: "İsim Soyisim",
+            defSim2: "İsim2 Soyisim2",
+            genHead: "⚡ Tüm 62 Yetenek ve Bütçe Oluşturucu",
+            skillLbl: "Yetenek seçin (62 kayıt):",
+            lvlLbl: "Yetenek seviyesi:",
+            moneyLbl: "💰 Kesin Aile Bütçesi:",
+            search: "Tüm kodlar, yetenekler, kariyerler içinde ara veya 🎙️...",
+            allCat: "Tüm Kodlar",
+            foundLbl: "Toplam kod:",
+            copy: "Kopyala",
+            copied: "Kopyalandı!",
+            simTag: "👤 İsim eklendi",
+            bubbleHeader: "Sim Düşüncesi",
+            voiceListen: "🎙️ Dinleniyor...",
+            tips: {
+                tip_sulsul: "Sizin «Sul Sul!» ses dosyanızı çalar.",
+                tip_music: "Sizin arka plan müziğinizi açar veya kapatır.",
+                tip_sfx: "Butonlara basıldığında Sims 4 arayüz seslerini açar veya kapatır.",
+                tip_audio_files: "Kendi MP3 müzik ve selamlama dosyalarınızı seçin.",
+                tip_bubbles: "Sims tarzı düşünce baloncuklarını açar veya kapatır.",
+                tip_theme: "Koyu ve açık tema arasında geçiş yapar.",
+                tip_pip: "Rehberi diğer pencerelerin üzerinde mini pencerede açar.",
+                tip_lang: "Arayüzü ve baloncukları 4 dile çevirir.",
+                tip_console: "Oyunda hile konsolunu açmak için bu 3 tuşa basın.",
+                tip_dev: "Diğer hilelerin çalışması için önce bu kodu girin.",
+                tip_cas: "Mevcut simleri CAS'ta tamamen düzenlemeyi açar.",
+                tip_sim_add: "Siminizin İsim ve Soyismini ekleyin — hafızaya kaydedilir.",
+                tip_sim_select: "Seçilen isimler ilişki kodlarına otomatik eklenir!",
+                tip_sim_chips: "Kayıtlı simleriniz: seçmek için tıklayın, silmek için ✕ basın.",
+                tip_rel_slider: "-100 (Düşman) ile +100 (Dostluk/Aşk) arasında kaydırın.",
+                tip_career_gen: "36 kariyerden birini seçip terfi ettirin veya işe sokun!",
+                tip_skill_select: "Oyundaki 62 yetenek kaydının tam listesi.",
+                tip_skill_slider: "Yetenek seviyesini ayarlayın.",
+                tip_skill_result: "Seçilen yetenek için hazır kod!",
+                tip_money_slider: "Bütçeyi 0'dan 9.999.999 §'a kadar ayarlayın.",
+                tip_money_result: "Kesin para miktarı için hazır hile kodu.",
+                tip_search: "Kelime yazın veya sağdaki mikrofonla sesli arayın.",
+                tip_voice: "Mikrofona tıklayın ve aradığınız hileyi sesli söyleyin!",
+                tip_cats: "Kategorilere göre hızlı filtreleme."
+            }
+        },
+        en: {
+            title: "The Sims 4 Cheat Studio PRO",
+            authorTop: "Created by Emin Mirkarimov",
+            authorFooter: "Created by Emin Mirkarimov • Complete Sims 4 Cheats Encyclopedia",
+            musicOn: "Music: ON",
+            musicOff: "Music: OFF",
+            sfxOn: "UI SFX: ON",
+            sfxOff: "UI SFX: OFF",
+            tipsOn: "Bubbles: ON",
+            tipsOff: "Bubbles: OFF",
+            themeDark: "Dark",
+            themeLight: "Light",
+            pip: "Always on Top",
+            q1: "1. Open game console",
+            q2: "2. Main developer cheat",
+            q3: "3. Full CAS character editor",
+            simsHead: "👤 My Sims, Relationships & Career Generator",
+            simPlaceholder: "First & Last Name (e.g. Bella Goth)",
+            addBtn: "➕ Add Sim",
+            sim1Lbl: "Sim 1 (Active Sim):",
+            sim2Lbl: "Sim 2 (Target Sim):",
+            relSliderLbl: "❤️ Relationship Level in Cheats:",
+            careerLbl: "💼 Select a career or school grade (38):",
+            careerActLbl: "Career Action:",
+            noSims: "No saved Sims — add your Sim's name above",
+            defSim1: "FirstName LastName",
+            defSim2: "FirstName2 LastName2",
+            genHead: "⚡ All 62 Skill Entries & Exact Money Sliders",
+            skillLbl: "Select a skill (62 entries):",
+            lvlLbl: "Skill Level:",
+            moneyLbl: "💰 Exact Household Funds:",
+            search: "Search all cheats, skills, careers, ghosts or click 🎙️...",
+            allCat: "All Cheats",
+            foundLbl: "Total cheats:",
+            copy: "Copy",
+            copied: "Copied!",
+            simTag: "👤 Name inserted",
+            bubbleHeader: "Sim Thought",
+            voiceListen: "🎙️ Listening...",
+            tips: {
+                tip_sulsul: "Plays your custom 'Sul Sul!' audio file.",
+                tip_music: "Toggles your custom background song.",
+                tip_sfx: "Toggles authentic Sims 4 UI sound effects when clicking buttons and sliders.",
+                tip_audio_files: "Link your custom MP3 greeting and music files.",
+                tip_bubbles: "Toggles these non-blocking Sims thought bubbles.",
+                tip_theme: "Switches between Dark and Light mode with animated background.",
+                tip_pip: "Opens a compact floating window on top of other windows.",
+                tip_lang: "Translates UI, cheats, and bubbles into 4 languages.",
+                tip_console: "Press these 3 keys in-game to open the cheat console.",
+                tip_dev: "Enter this first so all other advanced cheats work.",
+                tip_cas: "Unlocks full body, face, age, and traits editing in CAS.",
+                tip_sim_add: "Add your Sim's First & Last name to memory.",
+                tip_sim_select: "Selected names are auto-inserted into relationship cheats!",
+                tip_sim_chips: "Your saved Sims: click to select or ✕ to delete.",
+                tip_rel_slider: "Slide from -100 (Enemies) to +100 (Soulmates) to update cheats live!",
+                tip_career_gen: "Choose from 36 career paths and 2 school-grade entries to promote, join, demote, or quit!",
+                tip_skill_select: "Complete list of 62 skill entries (Adult, Child, Toddler & expansion content).",
+                tip_skill_slider: "Drag to set the exact skill level.",
+                tip_skill_result: "Ready-to-copy skill cheat command!",
+                tip_money_slider: "Slide from 0 to 9,999,999 § or pick a quick preset.",
+                tip_money_result: "Ready-to-copy exact household funds command.",
+                tip_search: "Type a keyword or click the microphone for voice search.",
+                tip_voice: "Click and speak a cheat name or category out loud!",
+                tip_cats: "Filter cheats quickly by category."
+            }
+        }
+    };
+
+    /* === 5. БАЗА 62 ЗАПИСЕЙ НАВЫКОВ THE SIMS 4 === */
+    var SKILLS = [
+        { code: "Major_HomestyleCooking", max: 10, ru: "Кулинария (Домашняя)", az: "Aşpazlıq (Ev)", tr: "Ev Yemekleri", en: "Homestyle Cooking" },
+        { code: "Major_GourmetCooking", max: 10, ru: "Изысканная кулинария", az: "Qurman aşpazlıq", tr: "Gurme Yemekler", en: "Gourmet Cooking" },
+        { code: "Major_Baking", max: 10, ru: "Выпечка", az: "Şirniyyat bişirmə", tr: "Fırıncılık", en: "Baking" },
+        { code: "Major_Bartending", max: 10, ru: "Смешивание напитков (Бармен)", az: "Barmenlik", tr: "Barmenlik (Miksoloji)", en: "Mixology" },
+        { code: "Major_Charisma", max: 10, ru: "Обаяние (Харизма)", az: "Xarizma (Cazibə)", tr: "Karizma", en: "Charisma" },
+        { code: "Major_Comedy", max: 10, ru: "Комедия", az: "Komediya", tr: "Komedi", en: "Comedy" },
+        { code: "Major_Mischief", max: 10, ru: "Пакости", az: "Şuluqluq", tr: "Yaramazlık", en: "Mischief" },
+        { code: "Major_Logic", max: 10, ru: "Логика", az: "Məntiq", tr: "Mantık", en: "Logic" },
+        { code: "Skill_Fitness", max: 10, ru: "Фитнес (Спорт)", az: "Fitnes (İdman)", tr: "Fitness (Spor)", en: "Fitness" },
+        { code: "Major_Wellness", max: 10, ru: "Здоровый образ жизни (Йога)", az: "Sağlam həyat (Yoqa)", tr: "Sağlıklı Yaşam (Yoga)", en: "Wellness" },
+        { code: "Major_Painting", max: 10, ru: "Рисование", az: "Rəssamlıq", tr: "Resim", en: "Painting" },
+        { code: "Major_Writing", max: 10, ru: "Писательство", az: "Yazıçılıq", tr: "Yazarlık", en: "Writing" },
+        { code: "Major_Guitar", max: 10, ru: "Гитара", az: "Gitara", tr: "Gitar", en: "Guitar" },
+        { code: "Major_Piano", max: 10, ru: "Пианино", az: "Pianino", tr: "Piyano", en: "Piano" },
+        { code: "Major_Violin", max: 10, ru: "Скрипка", az: "Skripka", tr: "Keman", en: "Violin" },
+        { code: "Major_PipeOrgan", max: 10, ru: "Орган (Вампиры)", az: "Orqan (Vampirlər)", tr: "Org (Vampirler)", en: "Pipe Organ" },
+        { code: "Major_Singing", max: 10, ru: "Пение (Вокал)", az: "Oxuma (Vokal)", tr: "Şarkı Söyleme", en: "Singing" },
+        { code: "Major_DJMixing", max: 10, ru: "Диджей (DJ)", az: "DJ pultu", tr: "DJ Miksajı", en: "DJ Mixing" },
+        { code: "Major_Programming", max: 10, ru: "Программирование", az: "Proqramlaşdırma", tr: "Programlama", en: "Programming" },
+        { code: "Major_VideoGaming", max: 10, ru: "Видеоигры", az: "Video oyunlar", tr: "Video Oyunları", en: "Video Gaming" },
+        { code: "Major_Handiness", max: 10, ru: "Механика", az: "Mexanika (Ustalıq)", tr: "El Becerisi (Tamir)", en: "Handiness" },
+        { code: "Major_Gardening", max: 10, ru: "Садоводство", az: "Bağbanlıq", tr: "Bahçecilik", en: "Gardening" },
+        { code: "Major_Fishing", max: 10, ru: "Рыбная ловля", az: "Balıqçılıq", tr: "Balıkçılık", en: "Fishing" },
+        { code: "Major_RocketScience", max: 10, ru: "Ракетостроение", az: "Raket elmi", tr: "Roket Bilimi", en: "Rocket Science" },
+        { code: "Major_Herbalism", max: 10, ru: "Траволечение (В поход)", az: "Bitki müalicəsi", tr: "Şifacılık (Bitkiler)", en: "Herbalism" },
+        { code: "Major_Parenting", max: 10, ru: "Воспитание детей", az: "Valideynlik", tr: "Ebeveynlik", en: "Parenting" },
+        { code: "Major_Vet", max: 10, ru: "Ветеринария", az: "Baytarlıq", tr: "Veterinerlik", en: "Veterinarian" },
+        { code: "Major_Archaeology", max: 10, ru: "Археология (Джунгли)", az: "Arxeologiya", tr: "Arkeoloji", en: "Archaeology" },
+        { code: "statistic_Skill_AdultMajor_FlowerArranging", max: 10, ru: "Флористика (Букеты)", az: "Floristika (Gülçülük)", tr: "Çiçek Aranjmanı", en: "Flower Arranging" },
+        { code: "Major_Acting", max: 10, ru: "Актерское мастерство", az: "Aktyorluq", tr: "Oyunculuk", en: "Acting" },
+        { code: "Major_ResearchDebate", max: 10, ru: "Научные исследования и дебаты", az: "Tədqiqat və Debatlar", tr: "Araştırma ve Münazara", en: "Research & Debate" },
+        { code: "Major_Robotics", max: 10, ru: "Робототехника", az: "Robototexnika", tr: "Robotik", en: "Robotics" },
+        { code: "Major_Fabrication", max: 10, ru: "Производство (Экология)", az: "İstehsalat (Ekologiya)", tr: "Üretim (Ekoloji)", en: "Fabrication" },
+        { code: "AdultMajor_Knitting", max: 10, ru: "Вязание", az: "Toxuculuq", tr: "Örgü", en: "Knitting" },
+        { code: "Major_RockClimbing", max: 10, ru: "Скалолазание", az: "Qayayadırmanma", tr: "Kaya Tırmanışı", en: "Rock Climbing" },
+        { code: "Major_Skiing", max: 10, ru: "Лыжи", az: "Xizəksürmə", tr: "Kayak", en: "Skiing" },
+        { code: "Major_Snowboarding", max: 10, ru: "Сноуборд", az: "Snoubord", tr: "Snowboard", en: "Snowboarding" },
+        { code: "AdultMajor_HorseRiding", max: 10, ru: "Верховая езда (Лошади)", az: "Atçılıq", tr: "Binicilik", en: "Horse Riding" },
+        { code: "Major_Romance", max: 10, ru: "Романтика (Стрелы купидона)", az: "Romantika", tr: "Romantizm", en: "Romance Skill" },
+        { code: "Major_Pottery", max: 10, ru: "Гончарное дело", az: "Dulusçuluq", tr: "Çömlekçilik", en: "Pottery" },
+        { code: "Major_Tattooing", max: 10, ru: "Татуировка", az: "Tatu sənəti", tr: "Dövmecilik", en: "Tattooing" },
+        { code: "Major_Gemology", max: 10, ru: "Геммология (Кристаллы)", az: "Gemologiya (Kristallar)", tr: "Gemoloji (Kristaller)", en: "Gemology" },
+        { code: "Major_Photography", max: 5, ru: "Фотография (макс. 5)", az: "Fotoqrafiya (maks. 5)", tr: "Fotoğrafçılık (maks. 5)", en: "Photography (max 5)" },
+        { code: "Minor_MediaProduction", max: 5, ru: "Медиапроизводство / Монтаж (макс. 5)", az: "Media / Video Montaj (maks. 5)", tr: "Medya Prodüksiyonu (maks. 5)", en: "Media Production (max 5)" },
+        { code: "Minor_Dancing", max: 5, ru: "Танцы (макс. 5)", az: "Rəqs (maks. 5)", tr: "Dans (maks. 5)", en: "Dancing (max 5)" },
+        { code: "Skill_Bowling", max: 5, ru: "Боулинг (макс. 5)", az: "Boulinq (maks. 5)", tr: "Bowling (maks. 5)", en: "Bowling (max 5)" },
+        { code: "skill_Dog", max: 5, ru: "Дрессировка питомцев (макс. 5)", az: "Heyvan təlimi (maks. 5)", tr: "Evcil Hayvan Eğitimi (maks. 5)", en: "Pet Training (max 5)" },
+        { code: "Minor_LocalCulture", max: 5, ru: "Сельвадорадская культура (макс. 5)", az: "Selvadorada mədəniyyəti (maks. 5)", tr: "Selvadorada Kültürü (maks. 5)", en: "Selvadoradian Culture (max 5)" },
+        { code: "Minor_JuiceFizzing", max: 5, ru: "Соковарение (макс. 5)", az: "Şirə hazırlama (maks. 5)", tr: "Meyve Suyu Fermantasyonu (maks. 5)", en: "Juice Fizzing (max 5)" },
+        { code: "Skill_CrossStitch", max: 5, ru: "Вышивка крестиком (макс. 5)", az: "Tikmə (maks. 5)", tr: "Kanaviçe (maks. 5)", en: "Cross-Stitch (max 5)" },
+        { code: "AdultMinor_Entrepreneur", max: 5, ru: "Предпринимательство (макс. 5)", az: "Sahibkarlıq (maks. 5)", tr: "Girişimcilik (maks. 5)", en: "Entrepreneur (max 5)" },
+        { code: "AdultMinor_Nectar", max: 5, ru: "Приготовление нектара (макс. 5)", az: "Nektar hazırlama (maks. 5)", tr: "Nektar Yapımı (maks. 5)", en: "Nectar Making (max 5)" },
+        { code: "Minor_Thanatology", max: 5, ru: "Танатология (макс. 5)", az: "Tanatologiya (maks. 5)", tr: "Tanatoloji (maks. 5)", en: "Thanatology (max 5)" },
+        { code: "Skill_Child_Motor", max: 10, ru: "[Ребенок] Моторика", az: "[Uşaq] Motorika", tr: "[Çocuk] Motor", en: "[Child] Motor" },
+        { code: "Skill_Child_Mental", max: 10, ru: "[Ребенок] Интеллект", az: "[Uşaq] İntellekt", tr: "[Çocuk] Zihinsel", en: "[Child] Mental" },
+        { code: "Skill_Child_Creativity", max: 10, ru: "[Ребенок] Творчество", az: "[Uşaq] Yaradıcılıq", tr: "[Çocuk] Yaratıcılık", en: "[Child] Creativity" },
+        { code: "Skill_Child_Social", max: 10, ru: "[Ребенок] Общение", az: "[Uşaq] Ünsiyyət", tr: "[Çocuk] Sosyal", en: "[Child] Social" },
+        { code: "Statistic_Skill_Toddler_Movement", max: 5, ru: "[Малыш] Передвижение (макс. 5)", az: "[Körpə] Hərəkət (maks. 5)", tr: "[Yürümeye Başlayan] Hareket (maks. 5)", en: "[Toddler] Movement (max 5)" },
+        { code: "Statistic_Skill_Toddler_Communication", max: 5, ru: "[Малыш] Общение (макс. 5)", az: "[Körpə] Ünsiyyət (maks. 5)", tr: "[Yürümeye Başlayan] İletişim (maks. 5)", en: "[Toddler] Communication (max 5)" },
+        { code: "Statistic_Skill_Toddler_Thinking", max: 5, ru: "[Малыш] Мышление (макс. 5)", az: "[Körpə] Düşüncə (maks. 5)", tr: "[Yürümeye Başlayan] Düşünme (maks. 5)", en: "[Toddler] Thinking (max 5)" },
+        { code: "Statistic_Skill_Toddler_Imagination", max: 5, ru: "[Малыш] Воображение (макс. 5)", az: "[Körpə] Təxəyyül (maks. 5)", tr: "[Yürümeye Başlayan] Hayal Gücü (maks. 5)", en: "[Toddler] Imagination (max 5)" },
+        { code: "Statistic_Skill_Toddler_Potty", max: 3, ru: "[Малыш] Горшок (макс. 3)", az: "[Körpə] Güvəc (maks. 3)", tr: "[Yürümeye Başlayan] Лаzımlık (maks. 3)", en: "[Toddler] Potty (max 3)" }
+    ];
+
+    /* === 6. ПОЛНАЯ БАЗА ВСЕХ 36 КАРЬЕР И ШКОЛ ДЛЯ ГЕНЕРАТОРА === */
+    var CAREERS = [
+        { code: "Business", ru: "Бизнес", az: "Biznes", tr: "İş Dünyası", en: "Business" },
+        { code: "TechGuru", ru: "Технический специалист (IT)", az: "Texniki mütəxəssis (IT)", tr: "Teknoloji Gurusu", en: "Tech Guru" },
+        { code: "Culinary", ru: "Кулинария (Шеф-повар/Бармен)", az: "Kulinariya (Aşpaz)", tr: "Aşçılık", en: "Culinary" },
+        { code: "Astronaut", ru: "Космонавт", az: "Kosmonavt", tr: "Astronot", en: "Astronaut" },
+        { code: "Painter", ru: "Художник", az: "Rəssam", tr: "Ressam", en: "Painter" },
+        { code: "Writer", ru: "Писатель (Автор/Журналист)", az: "Yazıçı / Jurnalist", tr: "Yazar", en: "Writer" },
+        { code: "SecretAgent", ru: "Тайный агент (Спецагент)", az: "Gizli agent", tr: "Gizli Ajan", en: "Secret Agent" },
+        { code: "Criminal", ru: "Преступник (Босс/Оракул)", az: "Cinayətkar", tr: "Suçlu", en: "Criminal" },
+        { code: "Entertainer", ru: "Исполнитель (Музыкант/Комик)", az: "İfaçı (Musiqiçi/Komik)", tr: "Eğlendirici (Müzisyen)", en: "Entertainer" },
+        { code: "Athletic", ru: "Спортсмен (Атлет/Культурист)", az: "İdmançı (Atlet)", tr: "Sporcu", en: "Athlete" },
+        { code: "Detective", ru: "Детектив (Полиция)", az: "Detektiv (Polis)", tr: "Dedektif", en: "Detective" },
+        { code: "Doctor", ru: "Доктор (Врач)", az: "Həkim", tr: "Doktor", en: "Doctor" },
+        { code: "adult_active_Scientist", ru: "Ученый", az: "Alim", tr: "Bilim İnsanı", en: "Scientist" },
+        { code: "Activist", ru: "Политик", az: "Siyasətçi", tr: "Politikacı", en: "Politician" },
+        { code: "careers_adult_Critic", ru: "Критик (Ресторанный/Художественный)", az: "Tənqidçi", tr: "Eleştirmen", en: "Critic" },
+        { code: "SocialMedia", ru: "Социальные сети (Блогер/PR)", az: "Sosial şəbəkələr (Blogger)", tr: "Sosyal Medya", en: "Social Media" },
+        { code: "Actor", ru: "Актер («Путь к славе»)", az: "Aktyor", tr: "Oyuncu (Aktör)", en: "Actor" },
+        { code: "StyleInfluencer", ru: "Законодатель стиля (Стилист)", az: "Stilist", tr: "Stil Etkileyicisi", en: "Style Influencer" },
+        { code: "Adult_Gardener", ru: "Садовник (Ботаник/Флорист)", az: "Bağban / Florist", tr: "Bahçıvan", en: "Gardener" },
+        { code: "Military", ru: "Военный (Стренджервиль)", az: "Hərbçi", tr: "Asker", en: "Military" },
+        { code: "Conservationist", ru: "Эколог (Сулани)", az: "Ekoloq", tr: "Doğa Koruyucusu", en: "Conservationist" },
+        { code: "Education", ru: "Преподаватель (Профессор)", az: "Müəllim (Professor)", tr: "Eğitimci", en: "Education" },
+        { code: "Engineer", ru: "Инженер", az: "Mühəndis", tr: "Mühendis", en: "Engineer" },
+        { code: "Law", ru: "Юрист (Судья/Адвокат)", az: "Hüquqşünas (Hakim/Vəkil)", tr: "Hukukçu (Avukat)", en: "Law" },
+        { code: "CivilDesigner", ru: "Строительный инженер (Экология)", az: "İnşaat mühəndisi", tr: "Sivil Tasarımcı", en: "Civil Designer" },
+        { code: "CorporateWorker", ru: "Сарариман (Офисный работник)", az: "Ofis işçisi (Sarariman)", tr: "Kurumsal Çalışan", en: "Salaryperson" },
+        { code: "Deco", ru: "Дизайнер интерьеров", az: "İnteryer dizayneri", tr: "İç Mimar", en: "Interior Decorator" },
+        { code: "RomanceConsultant", ru: "Консультант по романтике", az: "Romantika məsləhətçisi", tr: "Romantizm Danışmanı", en: "Romance Consultant" },
+        { code: "Active_Reaper", ru: "Смерть (Жнец душ)", az: "Ölüm (Ruh biçən)", tr: "Azrail (Reaper)", en: "Grim Reaper Career" },
+        { code: "Mortician", ru: "Работник ритуального бюро", az: "Dəfn bürosu işçisi", tr: "Cenaze Levazımatçısı", en: "Undertaker / Mortician" },
+        { code: "Highschool", ru: "[Учеба] Старшая школа (повысить оценку)", az: "[Məktəb] Orta məktəb qiyməti", tr: "[Okul] Lise Notu", en: "[School] High School Grade" },
+        { code: "Gradeschool", ru: "[Учеба] Младшая школа (повысить оценку)", az: "[Məktəb] İbtidai məktəb qiyməti", tr: "[Okul] İlkokul Notu", en: "[School] Grade School" },
+        { code: "Barista", ru: "[Подработка] Бариста (Кофейня)", az: "[Yarımştat] Barista", tr: "[Yarı Zamanlı] Barista", en: "[Part-Time] Barista" },
+        { code: "Babysitter", ru: "[Подработка] Няня", az: "[Yarımştat] Dayə", tr: "[Yarı Zamanlı] Bebek Bakıcısı", en: "[Part-Time] Babysitter" },
+        { code: "FastFood", ru: "[Подработка] Официант фастфуда", az: "[Yarımştat] Fastfud işçisi", tr: "[Yarı Zamanlı] Fast Food", en: "[Part-Time] Fast Food" },
+        { code: "Lifeguard", ru: "[Подработка] Спасатель на пляже", az: "[Yarımştat] Xilasedici", tr: "[Yarı Zamanlı] Cankurtaran", en: "[Part-Time] Lifeguard" },
+        { code: "Streamer", ru: "[Подработка] Стример видеоигр", az: "[Yarımştat] Strimer", tr: "[Yarı Zamanlı] Yayıncı", en: "[Part-Time] Video Game Streamer" },
+        { code: "Simfluencer", ru: "[Подработка] Симфлюэнсер", az: "[Yarımştat] Simfluenser", tr: "[Yarı Zamanlı] Simfluencer", en: "[Part-Time] Simfluencer" }
+    ];
+
+    var STYLES = {
+        basics: { bg: "linear-gradient(135deg, #1e3a8a, #0084ff)", icon: "⚙️" },
+        money: { bg: "linear-gradient(135deg, #065f46, #2ecc71)", icon: "💰" },
+        build: { bg: "linear-gradient(135deg, #9a3412, #f97316)", icon: "🏠" },
+        needs: { bg: "linear-gradient(135deg, #0f766e, #14b8a6)", icon: "⚡" },
+        skills: { bg: "linear-gradient(135deg, #0369a1, #38bdf8)", icon: "🎓" },
+        career: { bg: "linear-gradient(135deg, #581c87, #a855f7)", icon: "💼" },
+        relations: { bg: "linear-gradient(135deg, #9d174d, #ec4899)", icon: "❤️" },
+        traits: { bg: "linear-gradient(135deg, #b45309, #f59e0b)", icon: "🌟" },
+        occult: { bg: "linear-gradient(135deg, #3b0764, #9333ea)", icon: "🧛" },
+        deaths: { bg: "linear-gradient(135deg, #1f2937, #64748b)", icon: "👻" },
+        world: { bg: "linear-gradient(135deg, #064e3b, #059669)", icon: "🌦️" }
+    };
+
+    /* === 7. ПОЛНАЯ ЭНЦИКЛОПЕДИЯ КАРТОЧЕК ЧИТОВ (103 КАРТОЧКИ ПО 11 КАТЕГОРИЯМ) === */
+    var CHEATS = [
+        // 1. ОСНОВНЫЕ И ИНТЕРФЕЙС
+        { type: "basics", cat: { ru: "Основные", az: "Əsas", tr: "Temel", en: "Basics" }, code: "testingcheats true", desc: { ru: "Включает режим разработчика и секретное меню по Shift + Клик на симах, земле и почтовом ящике.", az: "Tərtibatçı rejimini və Shift + Klik gizli menyusunu aktivləşdirir.", tr: "Geliştirici modunu ve Shift + Tık gizli menüsünü açar.", en: "Enables testing cheats and Shift + Click secret menu." } },
+        { type: "basics", cat: { ru: "Основные", az: "Əsas", tr: "Temel", en: "Basics" }, code: "cas.fulleditmode", desc: { ru: "Открывает полное изменение внешности, фигуры, возраста, голоса и черт характера уже созданных симов.", az: "CAS-da simin bədənini, üzünü, yaşını və xarakterini tam dəyişməyi açır.", tr: "CAS'ta simlerin yüz, vücut, yaş ve özelliklerini tamamen düzenlemeyi açar.", en: "Unlocks full Sim editing in Create-a-Sim (body, face, traits, age)." } },
+        { type: "basics", cat: { ru: "Основные", az: "Əsas", tr: "Temel", en: "Basics" }, code: "resetSim {SIM1}", hasSim: true, desc: { ru: "Перезагружает зависшего или застрявшего персонажа (имя Сима 1 подставляется автоматически).", az: "Donmuş personajı yenidən başladır (Sim 1 adı avtomatik yazılır).", tr: "Takılan simi sıfırlar (Sim 1 adı otomatik eklenir).", en: "Resets a stuck Sim (automatically inserts Sim 1 name)." } },
+        { type: "basics", cat: { ru: "Основные", az: "Əsas", tr: "Temel", en: "Basics" }, code: "headlineeffects off", desc: { ru: "Скрывает зеленый ромбик (пламбоб) и облачка мыслей над головами симов для съемки видео.", az: "Simlərin başı üzərindəki yaşıl rombu və düşüncə buludlarını gizlədir.", tr: "Simlerin başındaki yeşil kristali ve düşünce balonlarını gizler.", en: "Hides plumbob and thought bubbles above Sims' heads." } },
+        { type: "basics", cat: { ru: "Основные", az: "Əsas", tr: "Temel", en: "Basics" }, code: "headlineeffects on", desc: { ru: "Возвращает отображение зеленого пламбоба и облачков мыслей над головами симов.", az: "Plambob və düşüncə buludlarını yenidən göstərir.", tr: "Kristali ve düşünce balonlarını geri getirir.", en: "Restores plumbob and thought bubbles above Sims." } },
+        { type: "basics", cat: { ru: "Основные", az: "Əsas", tr: "Temel", en: "Basics" }, code: "hovereffects off", desc: { ru: "Убирает белую подсветку-обводку вокруг персонажей и предметов при наведении курсора.", az: "Kursoru gətirdikdə ağ haşiyə işıqlandırmasını ləğv edir.", tr: "Fareyle üzerine gelindiğinde oluşan beyaz çizgiyi kaldırır.", en: "Removes white outline highlight when hovering over Sims/objects." } },
+        { type: "basics", cat: { ru: "Основные", az: "Əsas", tr: "Temel", en: "Basics" }, code: "freecam", desc: { ru: "Включает свободную кинематографичную камеру с возможностью летать по всему району.", az: "Oyunda sərbəst kinematoqrafik kameranı aktivləşdirir.", tr: "Serbest sinematik kamera modunu açar.", en: "Enables free roaming cinematic camera." } },
+        { type: "basics", cat: { ru: "Основные", az: "Əsas", tr: "Temel", en: "Basics" }, code: "fps on", desc: { ru: "Показывает счетчик частоты кадров (FPS) в левом нижнем углу экрана.", az: "Ekranın sol aşağı küncündə FPS sayğacını göstərir.", tr: "Sol alt köşede FPS sayacını gösterir.", en: "Displays frame rate (FPS) counter in the bottom-left corner." } },
+        { type: "basics", cat: { ru: "Основные", az: "Əsas", tr: "Temel", en: "Basics" }, code: "fullscreen", desc: { ru: "Мгновенно переключает игру между полноэкранным и оконным режимом.", az: "Oyunu tam ekran və pəncərə rejimi arasında dəyişir.", tr: "Tam ekran ve pencere modu arasında geçiş yapar.", en: "Toggles between fullscreen and windowed mode." } },
+
+        // 2. ДЕНЬГИ, СЧЕТА И БИЗНЕС
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "motherlode", desc: { ru: "Мгновенно добавляет семье 50 000 симолеонов.", az: "Ailə büdcəsinə dərhal 50.000 simoleon əlavə edir.", tr: "Hane bütçesine anında 50.000 Simoleon ekler.", en: "Instantly adds 50,000 Simoleons to household funds." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "kaching", desc: { ru: "Добавляет семье 1 000 симолеонов.", az: "Ailə büdcəsinə 1.000 simoleon əlavə edir.", tr: "Hane bütçesine 1.000 Simoleon ekler.", en: "Adds 1,000 Simoleons to household funds." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "rosebud", desc: { ru: "Классический код серии Sims — добавляет 1 000 симолеонов.", az: "Klassik Sims kodu — 1.000 simoleon əlavə edir.", tr: "Klasik Sims kodu — 1.000 Simoleon ekler.", en: "Classic Sims cheat — adds 1,000 Simoleons." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "Money 9999999", desc: { ru: "Устанавливает максимальный возможный баланс в игре — 9 999 999 симолеонов.", az: "Maksimum balansı təyin edir — 9.999.999 simoleon.", tr: "Maksimum para sınırını ayarlar — 9.999.999 Simoleon.", en: "Sets maximum possible funds: 9,999,999 Simoleons." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "FreeRealEstate on", desc: { ru: "Делает абсолютно все дома, квартиры и пентхаусы бесплатными на карте города.", az: "Şəhər xəritəsində bütün evləri və mənzilləri pulsuz edir.", tr: "Haritadaki tüm ev ve daireleri ücretsiz yapar.", en: "Makes all residential lots free on the world map." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "household.autopay_bills true", desc: { ru: "Отключает счета за ЖКХ и налоги на участок — они оплачиваются автоматически и бесплатно.", az: "Kommunal ödənişləri avtomatik və pulsuz ödəyir.", tr: "Ev faturalarını otomatik ve ücretsiz öder.", en: "Automatically pays all household bills for free." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "sims.give_satisfaction_points 50000", desc: { ru: "Начисляет выбранному симу 50 000 баллов счастья для покупки всех наград и зелий.", az: "Mükafat mağazası üçün simə 50.000 məmnuniyyət xalı verir.", tr: "Ödül mağazası için 50.000 memnuniyet puanı verir.", en: "Grants 50,000 satisfaction points to the active Sim." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "bucks.unlock_perk SeriousShopper true", desc: { ru: "[Магазин] Открывает бонус «Серьезный покупатель» — клиенты покупают товары гораздо быстрее.", az: "[Mağaza] Müştərilərin malları daha tez almasını təmin edir.", tr: "[Mağaza] Müşterilerin ürünleri çok daha hızlı satın almasını sağlar.", en: "[Retail] Unlocks Serious Shopper perk." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "bucks.unlock_perk InstantRestock true", desc: { ru: "[Магазин] Открывает бонус мгновенного пополнения распроданных товаров.", az: "[Mağaza] Satılmış malların dərhal bərpasını açır.", tr: "[Mağaza] Satılan ürünlerin anında stoklanmasını açar.", en: "[Retail] Unlocks Instant Restocking perk." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "bucks.unlock_perk MoreCustomers true", desc: { ru: "[Ресторан] Открывает бонус «Наплыв посетителей» для вашего ресторана.", az: "[Restoran] Restoranınıza daha çox müştəri cəlb edir.", tr: "[Restoran] Restoranınıza müşteri akını sağlar.", en: "[Restaurant] Unlocks Meal Rush (More Customers) perk." } },
+        { type: "money", cat: { ru: "Деньги и Бизнес", az: "Pul və Biznes", tr: "Para ve İş", en: "Money & Perks" }, code: "bucks.unlock_perk AdditionalVet_1 true", desc: { ru: "[Ветклиника] Разблокирует найм дополнительного ветеринара.", az: "[Vetklinika] Əlavə baytar işə götürməyi açır.", tr: "[Veteriner] Ek veteriner işe alma kilidini açar.", en: "[Vet Clinic] Unlocks Additional Vet #1 perk." } },
+
+        // 3. СТРОИТЕЛЬСТВО И ОТЛАДКА
+        { type: "build", cat: { ru: "Строительство", az: "Tikinti", tr: "İnşaat", en: "Building" }, code: "bb.moveobjects on", desc: { ru: "Снимает ограничения сетки: позволяет ставить мебель вплотную и поднимать клавишами 9 и 0.", az: "Əşyaları şəbəkədən kənar qoymağa və 9/0 düymələri ilə qaldırmağa imkan verir.", tr: "Eşyaları ızgara dışında yerleştirmeyi ve 9/0 ile yükseltmeyi sağlar.", en: "Allows placing objects anywhere ignoring grid (use 9 and 0 to raise/lower)." } },
+        { type: "build", cat: { ru: "Строительство", az: "Tikinti", tr: "İnşaat", en: "Building" }, code: "bb.showhiddenobjects", desc: { ru: "Открывает скрытые объекты отладки (Debug): редкие предметы, пруды, генераторы рыбы, еду.", az: "Gizli sazlama (Debug) əşyalarını kataloqda açır.", tr: "Gizli hata ayıklama (Debug) eşyalarını katalogda açar.", en: "Unlocks hidden Debug catalog items in Buy Mode." } },
+        { type: "build", cat: { ru: "Строительство", az: "Tikinti", tr: "İnşaat", en: "Building" }, code: "bb.showliveeditobjects", desc: { ru: "Открывает более 1000 объектов окружения города: машины, дома, мосты, деревья, скалы.", az: "Şəhər mühitindəki 1000+ avtomobil, bina və ağacları açır.", tr: "Şehirdeki 1000+ araba, bina ve çevre dekorasyonunu açar.", en: "Unlocks 1000+ world environment objects (cars, buildings, trees)." } },
+        { type: "build", cat: { ru: "Строительство", az: "Tikinti", tr: "İnşaat", en: "Building" }, code: "bb.ignoregameplayunlocksentitlement", desc: { ru: "Разблокирует всю закрытую мебель, одежду и комнаты, которые даются за карьеры.", az: "Karyera yüksəlişi ilə açılan bütün bağlı mebellərin kilidini açır.", tr: "Kariyer ödülü olarak kilitli olan tüm eşyaların kilidini açar.", en: "Unlocks all career-locked Buy Mode items and styled rooms." } },
+        { type: "build", cat: { ru: "Строительство", az: "Tikinti", tr: "İnşaat", en: "Building" }, code: "bb.enablefreebuild", desc: { ru: "Разрешает перестраивать больницу, полицейский участок, научную лабораторию, общежития.", az: "Xəstəxana, polis bölməsi, laboratoriya və yataqxanaları dəyişməyə icazə verir.", tr: "Hastane, karakol, laboratuvar ve yurtları düzenlemenizi sağlar.", en: "Enables building on locked lots (hospital, police, lab, dorms)." } },
+        { type: "build", cat: { ru: "Строительство", az: "Tikinti", tr: "İnşaat", en: "Building" }, code: "bb.increaserentalunitcap on", desc: { ru: "[Сдается!] Снимает лимит в 6 квартир на одном участке съемного жилья (позволяет строить до 99 квартир).", az: "[Kirayə!] Bir sahədə 6 mənzil limitini ləğv edir.", tr: "[Kiralık!] Bir arsadaki 6 daire sınırını kaldırır.", en: "[For Rent] Removes the 6-unit cap on residential rental lots." } },
+
+        // 4. ПОТРЕБНОСТИ, ВОЗРАСТ И БЕРЕМЕННОСТЬ
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "sims.fill_all_commodities", desc: { ru: "Полностью заполняет все шкалы потребностей сразу у всех членов семьи.", az: "Bütün ailə üzvlərinin tələbat şkalalarını maksimuma çatdırır.", tr: "Tüm aile üyelerinin ihtiyaç barlarını tamamen doldurur.", en: "Fills all need bars for all Sims in the household." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "fillmotive motive_Energy", desc: { ru: "На 100% восстанавливает бодрость (энергию) выбранного сима.", az: "Seçilmiş simin enerji şkalasını 100% doldurur.", tr: "Seçili simin enerji barını %100 doldurur.", en: "Fills the active Sim's Energy motive to 100%." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "fillmotive motive_Hunger", desc: { ru: "На 100% утоляет голод выбранного сима.", az: "Seçilmiş simin aclığını 100% aradan qaldırır.", tr: "Seçili simin açlık barını %100 doldurur.", en: "Fills the active Sim's Hunger motive to 100%." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "fillmotive motive_Bladder", desc: { ru: "На 100% восстанавливает естественную нужду выбранного сима.", az: "Tualet ehtiyacını 100% bərpa edir.", tr: "Tuvalet ihtiyacını %100 doldurur.", en: "Fills the active Sim's Bladder motive to 100%." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "fillmotive motive_Hygiene", desc: { ru: "На 100% восстанавливает чистоту (гигиену) выбранного сима.", az: "Gigiyena şkalasını 100% bərpa edir.", tr: "Hijyen barını %100 doldurur.", en: "Fills the active Sim's Hygiene motive to 100%." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "fillmotive motive_Fun", desc: { ru: "На 100% заполняет шкалу досуга (веселья) выбранного сима.", az: "Əyləncə şkalasını 100% doldurur.", tr: "Eğlence barını %100 doldurur.", en: "Fills the active Sim's Fun motive to 100%." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "fillmotive motive_Social", desc: { ru: "На 100% заполняет шкалу общения выбранного сима.", az: "Ünsiyyət şkalasını 100% doldurur.", tr: "Sosyal barını %100 doldurur.", en: "Fills the active Sim's Social motive to 100%." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "fillmotive motive_toddler_attention", desc: { ru: "На 100% восполняет потребность во внимании у малыша.", az: "Körpənin diqqət ehtiyacını 100% doldurur.", tr: "Yürümeye başlayan çocuğun ilgi ihtiyacını doldurur.", en: "Fills a Toddler's Attention need to 100%." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "aspirations.complete_current_milestone", desc: { ru: "Мгновенно засчитывает текущий этап жизненной цели сима и начисляет баллы счастья.", az: "Simin həyat məqsədinin cari mərhələsini dərhal tamamlayır.", tr: "Mevcut hayat amacı aşamasını anında tamamlar.", en: "Completes current aspiration milestone and grants points." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "sims.add_buff Buff_Pregnancy_InLabor", desc: { ru: "Мгновенно начинает роды у беременного персонажа.", az: "Hamilə personajda doğuşu dərhal başladır.", tr: "Hamile simin doğumunu anında başlatır.", en: "Immediately triggers labor for a pregnant Sim." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "sims.add_buff Buff_Pregnancy_Trimester3", desc: { ru: "Переводит беременность сразу в 3-й триместр (можно указать Trimester1 или Trimester2).", az: "Hamiləliyi dərhal 3-cü trimestrə keçirir.", tr: "Hamileliği 3. триmestre geçirir.", en: "Sets pregnancy to 3rd Trimester (or Trimester1 / Trimester2)." } },
+        { type: "needs", cat: { ru: "Потребности и Сим", az: "Tələbatlar", tr: "İhtiyaçlar", en: "Needs & Sim" }, code: "objects.consumables_infinite_toggle", desc: { ru: "Делает всю приготовленную еду и зелья бесконечными (порции никогда не заканчиваются).", az: "Hazırlanmış bütün yeməkləri və iksirləri sonsuz edir.", tr: "Tüm yemekleri ve iksirleri sınırsız yapar.", en: "Makes all consumable food and potions infinite." } },
+
+        // 5. ОТНОШЕНИЯ И ЧУВСТВА (SENTIMENTS)
+        { type: "relations", cat: { ru: "Отношения", az: "Münasibətlər", tr: "İlişkiler", en: "Relationships" }, code: "modifyrelationship {SIM1} {SIM2} {REL} LTR_Friendship_Main", hasSim: true, desc: { ru: "Изменяет дружбу между Симом 1 и Симом 2 (имена и уровень с ползунка подставляются сами!).", az: "Sim 1 və Sim 2 arasındakı dostluğu dəyişir (sürgü ilə tənzimlənir).", tr: "Sim 1 ve Sim 2 arasındaki arkadaşlığı ayarlar.", en: "Sets Friendship between Sim 1 and Sim 2 using slider value." } },
+        { type: "relations", cat: { ru: "Отношения", az: "Münasibətlər", tr: "İlişkiler", en: "Relationships" }, code: "modifyrelationship {SIM1} {SIM2} {REL} LTR_Romance_Main", hasSim: true, desc: { ru: "Изменяет любовь и романтику между Симом 1 и Симом 2 (регулируется ползунком выше).", az: "Sim 1 və Sim 2 arasında sevgi və romantikanı dəyişir.", tr: "Sim 1 ve Sim 2 arasındaki romantizmi ayarlar.", en: "Sets Romance between Sim 1 and Sim 2 using slider value." } },
+        { type: "relations", cat: { ru: "Отношения", az: "Münasibətlər", tr: "İlişkiler", en: "Relationships" }, code: "modifyrelationship {SIM1} {SIM2} 100 LTR_SimToPet_Friendship_Main", hasSim: true, desc: { ru: "Устанавливает 100% дружбы между Симом 1 и питомцем (вместо Сима 2 укажите кличку питомца).", az: "Sim 1 ilə ev heyvanı arasında 100% dostluq yaradır.", tr: "Sim 1 ile evcil hayvan arasındaki arkadaşlığı %100 yapar.", en: "Sets 100% friendship between Sim 1 and a pet (Sim 2)." } },
+        { type: "relations", cat: { ru: "Отношения", az: "Münasibətlər", tr: "İlişkiler", en: "Relationships" }, code: "relationship.introduce_sim_to_all_others", desc: { ru: "Мгновенно знакомит вашего персонажа со всеми жителями всех городов.", az: "Personajınızı şəhərdəki bütün sakinlərlə dərhal tanış edir.", tr: "Siminizi şehirdeki tüm diğer simlerle anında tanıştırır.", en: "Instantly introduces your Sim to everyone in the world." } },
+        { type: "relations", cat: { ru: "Отношения", az: "Münasibətlər", tr: "İlişkiler", en: "Relationships" }, code: "relationships.create_friends_for_sim", desc: { ru: "Создает нового персонажа и сразу приводит его к вам домой в статусе хорошего друга.", az: "Yeni dost personaj yaradır və evinizə gətirir.", tr: "Yeni bir arkadaş sim oluşturur ve arsanıza getirir.", en: "Spawns a new Sim on your lot who is already your friend." } },
+        { type: "relations", cat: { ru: "Отношения", az: "Münasibətlər", tr: "İlişkiler", en: "Relationships" }, code: "modifyrelationship {SIM1} {SIM2} 100 sentimentTrack_Adoring_ST_generic", hasSim: true, desc: { ru: "Добавляет теплое чувство «Обожание» от Сима 1 к Симу 2.", az: "Sim 1-dən Sim 2-yə «Heyranlıq» hissi əlavə edir.", tr: "Sim 1'den Sim 2'ye «Hayranlık» duygusu ekler.", en: "Adds the 'Adoring' sentiment between Sim 1 and Sim 2." } },
+        { type: "relations", cat: { ru: "Отношения", az: "Münasibətlər", tr: "İlişkiler", en: "Relationships" }, code: "modifyrelationship {SIM1} {SIM2} 100 sentimentTrack_Enamored_ST_generic", hasSim: true, desc: { ru: "Добавляет романтическое чувство глубокой «Влюбленности» между Симом 1 и Симом 2.", az: "Sim 1 və Sim 2 arasında dərin «Vurğunluq» hissi yaradır.", tr: "Sim 1 ve Sim 2 arasında «Aşık Olma» duygusu ekler.", en: "Adds the 'Enamored' romantic sentiment between Sims." } },
+        { type: "relations", cat: { ru: "Отношения", az: "Münasibətlər", tr: "İlişkiler", en: "Relationships" }, code: "modifyrelationship {SIM1} {SIM2} 100 sentimentTrack_Close_LT_generic", hasSim: true, desc: { ru: "Добавляет долговременное чувство крепкой «Близости» между Симом 1 и Симом 2.", az: "Sim 1 və Sim 2 arasında «Yaxınlıq» hissi əlavə edir.", tr: "Sim 1 ve Sim 2 arasında «Yakınlık» duygusu ekler.", en: "Adds long-term 'Close' sentiment between Sim 1 and Sim 2." } },
+
+        // 6. НАВЫКИ И ДОСТОИНСТВА ХАРАКТЕРА (КАРТОЧКИ БЫСТРОГО ДОСТУПА)
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_skill_level Skill_Fitness 10", desc: { ru: "Прокачивает навык Фитнеса (Спорта) до максимального 10 уровня.", az: "Fitnes (İdman) bacarığını maksimum 10-cu səviyyəyə qaldırır.", tr: "Fitness yeteneğini maksimum 10. seviyeye çıkarır.", en: "Maxes out Fitness skill to level 10." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_skill_level Major_Charisma 10", desc: { ru: "Прокачивает навык Обаяния (Харизмы) до 10 уровня.", az: "Xarizma bacarığını 10-cu səviyyəyə qaldırır.", tr: "Karizma yeteneğini 10. seviyeye çıkarır.", en: "Maxes out Charisma skill to level 10." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_skill_level Major_HomestyleCooking 10", desc: { ru: "Прокачивает навык Кулинарии до 10 уровня.", az: "Aşpazlıq bacarığını 10-cu səviyyəyə qaldırır.", tr: "Ev Yemekleri yeteneğini 10. seviyeye çıkarır.", en: "Maxes out Homestyle Cooking skill to level 10." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_skill_level Major_Handiness 10", desc: { ru: "Прокачивает навык Механики до 10 уровня.", az: "Mexanika bacarığını 10-cu səviyyəyə qaldırır.", tr: "El Becerisi (Tamir) yeteneğini 10. seviyeye çıkarır.", en: "Maxes out Handiness skill to level 10." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_skill_level Major_Painting 10", desc: { ru: "Прокачивает навык Рисования до 10 уровня (шедевры за тысячи симолеонов).", az: "Rəssamlıq bacarığını 10-cu səviyyəyə qaldırır.", tr: "Resim yeteneğini 10. seviyeye çıkarır.", en: "Maxes out Painting skill to level 10." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_skill_level Major_Programming 10", desc: { ru: "Прокачивает навык Программирования до 10 уровня.", az: "Proqramlaşdırma bacarığını 10-cu səviyyəyə qaldırır.", tr: "Programlama yeteneğini 10. seviyeye çıkarır.", en: "Maxes out Programming skill to level 10." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_skill_level Major_Photography 5", desc: { ru: "Прокачивает навык Фотографии до максимального 5 уровня.", az: "Fotoqrafiya bacarığını maksimum 5-ci səviyyəyə qaldırır.", tr: "Fotoğrafçılık yeteneğini maksimum 5. seviyeye çıkarır.", en: "Maxes out Photography skill to level 5." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_skill_level Minor_MediaProduction 5", desc: { ru: "Прокачивает навык Медиапроизводства (видеомонтаж и треки) до максимума.", az: "Media istehsalı və video montaj bacarığını maksimuma çatdırır.", tr: "Medya Prodüksiyonu yeteneğini maksimum 5. seviyeye çıkarır.", en: "Maxes out Media Production skill to level 5." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_stat lifeSkillStatistic_Responsibility 100", desc: { ru: "[Родители] Прокачивает достоинство характера «Ответственность» у ребенка/подростка на 100%.", az: "[Valideynlər] Uşaqda «Məsuliyyət» xüsusiyyətini 100% edir.", tr: "[Ebeveynlik] «Sorumluluk» değerini %100 yapar.", en: "[Parenthood] Maxes out Responsibility character value to 100." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_stat lifeSkillStatistic_Manners 100", desc: { ru: "[Родители] Прокачивает «Хорошие манеры» у ребенка/подростка на 100%.", az: "[Valideynlər] «Yaxşı davranış» xüsusiyyətini 100% edir.", tr: "[Ebeveynlik] «Görgü Kuralları» değerini %100 yapar.", en: "[Parenthood] Maxes out Good Manners character value to 100." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_stat lifeSkillStatistic_Empathy 100", desc: { ru: "[Родители] Прокачивает «Сочувствие» (Эмпатию) у ребенка/подростка на 100%.", az: "[Valideynlər] «Empatiya» xüsusiyyətini 100% edir.", tr: "[Ebeveynlik] «Empati» değerini %100 yapar.", en: "[Parenthood] Maxes out Empathy character value to 100." } },
+        { type: "skills", cat: { ru: "Навыки", az: "Bacarıqlar", tr: "Yetenekler", en: "Skills" }, code: "stats.set_stat lifeSkillStatistic_EmotionalControl 100", desc: { ru: "[Родители] Прокачивает «Контроль над эмоциями» у ребенка/подростка на 100%.", az: "[Valideynlər] «Emosiyalara nəzarət» xüsusiyyətini 100% edir.", tr: "[Ebeveynlik] «Duygusal Kontrol» değerini %100 yapar.", en: "[Parenthood] Maxes out Emotional Control to 100." } },
+
+        // 7. КАРЬЕРА, ШКОЛА И УНИВЕРСИТЕТ
+        { type: "career", cat: { ru: "Карьера и Учеба", az: "Karyera", tr: "Kariyer", en: "Careers & Uni" }, code: "careers.promote Business", desc: { ru: "Повышает сима в карьере Бизнес (все 36 карьер доступны в генераторе выше!).", az: "Biznes karyerasında vəzifəni artırır.", tr: "İş (Business) kariyerinde terfi ettirir.", en: "Promotes Sim in the Business career." } },
+        { type: "career", cat: { ru: "Карьера и Учеба", az: "Karyera", tr: "Kariyer", en: "Careers & Uni" }, code: "careers.promote Highschool", desc: { ru: "Повышает оценку подростка в старшей школе на 1 балл вплоть до отличника.", az: "Orta məktəb qiymətini əlaçıya qaldırır.", tr: "Lise öğrencisinin okul notunu yükseltir.", en: "Raises teen's High School grade." } },
+        { type: "career", cat: { ru: "Карьера и Учеба", az: "Karyera", tr: "Kariyer", en: "Careers & Uni" }, code: "careers.promote Gradeschool", desc: { ru: "Повышает оценку ребенка в младшей школе на 1 балл.", az: "İbtidai məktəb qiymətini artırır.", tr: "İlkokul öğrencisinin notunu yükseltir.", en: "Raises child's Grade School performance." } },
+        { type: "career", cat: { ru: "Карьера и Учеба", az: "Karyera", tr: "Kariyer", en: "Careers & Uni" }, code: "careers.promote Scout", desc: { ru: "Повышает ранг ребенка или подростка во внеклассном кружке Скаутов.", az: "Skaut dərnəyində rütbəni artırır.", tr: "İzcilik kulübünde rütbe yükseltir.", en: "Promotes child/teen in the Scouting activity." } },
+        { type: "career", cat: { ru: "Карьера и Учеба", az: "Karyera", tr: "Kariyer", en: "Careers & Uni" }, code: "traits.equip_trait trait_University_ComputerScienceDegreeBH", desc: { ru: "[Университет] Мгновенно выдает престижный диплом с отличием по Информатике.", az: "[Universitet] İnformatika üzrə fərqlənmə diplomu verir.", tr: "[Üniversite] Bilgisayar Bilimi Onur Diploması verir.", en: "[University] Grants Honors Degree in Computer Science." } },
+        { type: "career", cat: { ru: "Карьера и Учеба", az: "Karyera", tr: "Kariyer", en: "Careers & Uni" }, code: "traits.equip_trait trait_University_BiologyDegreeBH", desc: { ru: "[Университет] Выдает престижный диплом с отличием по Биологии (для карьеры Врача).", az: "[Universitet] Biologiya üzrə fərqlənmə diplomu verir.", tr: "[Üniversite] Biyoloji Onur Diploması verir.", en: "[University] Grants Honors Degree in Biology." } },
+        { type: "career", cat: { ru: "Карьера и Учеба", az: "Karyera", tr: "Kariyer", en: "Careers & Uni" }, code: "traits.equip_trait trait_University_DramaDegreeBH", desc: { ru: "[Университет] Выдает диплом с отличием по Драматургии (для карьеры Актера).", az: "[Universitet] Dramaturgiya üzrə fərqlənmə diplomu verir.", tr: "[Üniversite] Drama Onur Diploması verir.", en: "[University] Grants Honors Degree in Drama." } },
+
+        // 8. СУПЕР-ЧЕРТЫ ХАРАКТЕРА (МАГАЗИН НАГРАД)
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait NeverWeary", desc: { ru: "Дает черту «Неустающий» — вашему персонажу больше никогда не нужно спать.", az: "«Yorulmaz» xüsusiyyəti verir — personajın yatmağa ehtiyacı olmur.", tr: "«Yorulmak Bilmez» özelliği verir — simin uyumasına gerek kalmaz.", en: "Adds 'Never Weary' trait — Sim never needs sleep." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait HardlyHungry", desc: { ru: "Дает черту «Укротитель голода» — персонаж почти не хочет есть.", az: "«Aclıq ramçısı» xüsusiyyəti verir — sim demək olar ki, acmır.", tr: "Simin neredeyse hiç acıkmamasını sağlar.", en: "Adds 'Hardly Hungry' trait — Sim rarely gets hungry." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait SteelBladder", desc: { ru: "Дает черту «Укротитель мочевого пузыря» — никогда не нужно ходить в туалет.", az: "Tualet ehtiyacını tamamilə aradan qaldırır.", tr: "Tuvalet ihtiyacını ortadan kaldırır.", en: "Adds 'Steel Bladder' trait — bladder need never drops." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait Antiseptic", desc: { ru: "Дает черту «Чистоплотность» — гигиена персонажа почти не падает.", az: "Gigiyena şkalasının düşməsinin qarşısını alır.", tr: "Hijyen ihtiyacının düşmesini engeller.", en: "Adds 'Antiseptic' trait — hygiene decays very slowly." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait Savant", desc: { ru: "Дает черту «Эрудит» — абсолютно все навыки прокачиваются гораздо быстрее.", az: "«Erudit» xüsusiyyəti verir — bütün bacarıqlar sürətlə artır.", tr: "Tüm yeteneklerin çok daha hızlı gelişmesini sağlar.", en: "Adds 'Savant' trait — all skills level up much faster." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait Carefree", desc: { ru: "Дает черту «Беззаботность» — сим никогда не испытывает напряжение и стресс.", az: "«Qayğısız» xüsusiyyəti verir — sim heç vaxt gərginlik keçirmir.", tr: "Simin asla gergin (stresli) olmamasını sağlar.", en: "Adds 'Carefree' trait — Sim never gets Tense." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait Shameless", desc: { ru: "Дает черту «Беззастенчивость» — сим никогда не испытывает смущение.", az: "Sim heç vaxt utancaqlıq hiss etmir.", tr: "Simin asla utanmamasını sağlar.", en: "Adds 'Shameless' trait — Sim never gets Embarrassed." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait AlwaysWelcome", desc: { ru: "Дает черту «Желанный гость» — в чужих домах можно готовить, спать и мыться как дома.", az: "Başqalarının evində öz eviniz kimi davranmağa icazə verir.", tr: "Başkalarının evinde kendi eviniz gibi davranmanızı sağlar.", en: "Adds 'Always Welcome' trait — act at home in any lot." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait FreeServices", desc: { ru: "Дает черту «Бесплатные услуги» — все одноразовые услуги, ремонтники и доставка бесплатны.", az: "Bütün xidmətləri və çatdırılmanı pulsuz edir.", tr: "Tüm tek seferlik hizmetleri ve siparişleri ücretsiz yapar.", en: "Adds 'Free Services' trait — all service requests are free." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait Marketable", desc: { ru: "Дает черту «Деловая хватка» — созданные симом картины и предметы продаются в разы дороже.", az: "Yaradılan rəsmlər və əşyalar qat-qat baha satılır.", tr: "Üretilen tabloların ve eşyaların çok daha pahalıya satılmasını sağlar.", en: "Adds 'Marketable' trait — crafted items sell for much more." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait SuperGreenThumb", desc: { ru: "Дает черту «Гений садоводства» — растения живут дольше и дают максимальный урожай.", az: "Bitkilər daha sağlam olur və bol məhsul verir.", tr: "Bitkilerin çok daha verimli ve canlı olmasını sağlar.", en: "Adds 'Super Green Thumb' trait for gardening." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.equip_trait Fertile", desc: { ru: "Дает черту «Многодетность» — высокий шанс рождения двойни или тройни.", az: "Əkiz və ya üçəm uşaq doğulma şansını artırır.", tr: "İkiz veya üçüz bebek sahibi olma şansını artırır.", en: "Adds 'Fertile' trait — high chance of twins or triplets." } },
+        { type: "traits", cat: { ru: "Супер-черты", az: "Xüsusiyyətlər", tr: "Özellikler", en: "Super Traits" }, code: "traits.clear_traits", desc: { ru: "Полностью очищает все черты характера у выбранного персонажа.", az: "Seçilmiş personajın bütün xarakter xüsusiyyətlərini silir.", tr: "Seçili simin tüm kişilik özelliklerini temizler.", en: "Removes all traits from the active Sim." } },
+
+        // 9. СВЕРХЪЕСТЕСТВЕННОЕ И ПРОКАЧКА РАНГОВ
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "traits.equip_trait trait_OccultVampire", desc: { ru: "Мгновенно превращает обычного персонажа в Вампира (удалить: traits.remove_trait).", az: "Adi personajı dərhal Vampirə çevirir.", tr: "Normal simi anında Vampire dönüştürür.", en: "Turns the active Sim into a Vampire." } },
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "stats.set_stat rankedStatistic_Occult_VampireXP 1593", desc: { ru: "Прокачивает Вампира до максимального ранга «Великий магистр» и дает очки способностей.", az: "Vampiri maksimum «Böyük Magistr» rütbəsinə qaldırır.", tr: "Vampiri maksimum «Büyük Üstat» rütbesine yükseltir.", en: "Maxes out Vampire rank to Grand Master and gives power points." } },
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "traits.equip_trait trait_Occult_WitchOccult", desc: { ru: "Мгновенно превращает персонажа в Чародея / Мага («Мир магии»).", az: "Personajı dərhal Cadugərə (Maqa) çevirir.", tr: "Simi anında Büyücüye dönüştürür.", en: "Turns the active Sim into a Spellcaster." } },
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "stats.set_stat rankedStatistic_WitchOccult_WitchXP 2850", desc: { ru: "Повышает ранг Чародея до максимального уровня «Виртуоз» и дает очки талантов магии.", az: "Cadugər rütbəsini maksimum «Virtuoz» səviyyəsinə qaldırır.", tr: "Büyücü rütbesini maksimum «Virtüöz» seviyesine çıkarır.", en: "Maxes out Spellcaster rank to Virtuoso." } },
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "traits.equip_trait trait_occultwerewolf", desc: { ru: "Мгновенно превращает персонажа в Оборотня.", az: "Personajı dərhal Qurd adama çevirir.", tr: "Simi anında Kurt Adama dönüştürür.", en: "Turns the active Sim into a Werewolf." } },
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "stats.set_stat rankedStatistic_Werewolf_Progression 3000", desc: { ru: "Прокачивает Оборотня до максимального ранга «Хищник» и дает очки способностей.", az: "Qurd adamı maksimum rütbəyə qaldırır.", tr: "Kurt Adamı maksimum «Apex» rütbesine çıkarır.", en: "Maxes out Werewolf rank to Apex." } },
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "traits.equip_trait trait_OccultMermaid", desc: { ru: "Мгновенно превращает персонажа в Русалку («Жизнь на острове»).", az: "Personajı dərhal Su pərisinə çevirir.", tr: "Simi anında Denizkızına dönüştürür.", en: "Turns the active Sim into a Mermaid." } },
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "traits.equip_trait trait_OccultAlien", desc: { ru: "Мгновенно превращает персонажа в Инопланетянина (Пришельца).", az: "Personajı dərhal Yadplanetliyə çevirir.", tr: "Simi anında Uzaylıya dönüştürür.", en: "Turns the active Sim into an Alien." } },
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "traits.equip_trait trait_Humanoid_Robots_MainTrait", desc: { ru: "Превращает обычного персонажа в боевого робота Серво («В университете»).", az: "Personajı Servo robotuna çevirir.", tr: "Simi Servo robota dönüştürür.", en: "Turns the active Sim into a Servo Robot." } },
+        { type: "occult", cat: { ru: "Сверхъестественное", az: "Fövqəltəbii", tr: "Doğaüstü", en: "Occult" }, code: "sims.add_buff Buff_Skeleton", desc: { ru: "На 12 часов превращает персонажа в живого Скелета из храма Сельвадорады.", az: "Personajı canlı Skeletə çevirir.", tr: "Simi canlı bir İskelete dönüştürür.", en: "Turns the active Sim into a Skeleton." } },
+
+        // 10. СМЕРТЬ, ПРИЗРАКИ И ВОСКРЕШЕНИЕ
+        { type: "deaths", cat: { ru: "Смерть и Призраки", az: "Ölüm və Ruhlar", tr: "Ölüm ve Hayaletler", en: "Deaths & Ghosts" }, code: "traits.equip_trait ghost_laugh", desc: { ru: "Превращает сима в Призрака (смерть от Истерики/Смеха). Замените equip_trait на remove_trait для воскрешения!", az: "Simi Ruha çevirir (Gülməkdən ölüm). Diriltmək üçün remove_trait yazın!", tr: "Simi Hayalete dönüştürür (Canlandırmak için remove_trait yazın).", en: "Turns Sim into a Ghost (Hysteria). Use remove_trait to resurrect!" } },
+        { type: "deaths", cat: { ru: "Смерть и Призраки", az: "Ölüm və Ruhlar", tr: "Ölüm ve Hayaletler", en: "Deaths & Ghosts" }, code: "traits.equip_trait ghost_anger", desc: { ru: "Превращает сима в Призрака от Ярости (разрыв сердца). Для воскрешения: traits.remove_trait ghost_anger.", az: "Qəzəbdən ölən Ruha çevirir (Diriltmək üçün: remove_trait).", tr: "Öfkeden ölen Hayalete dönüştürür.", en: "Turns Sim into an Anger Ghost (remove_trait to resurrect)." } },
+        { type: "deaths", cat: { ru: "Смерть и Призраки", az: "Ölüm və Ruhlar", tr: "Ölüm ve Hayaletler", en: "Deaths & Ghosts" }, code: "traits.equip_trait ghost_fire", desc: { ru: "Превращает сима в огненного Призрака (смерть от Пожара).", az: "Yanğından ölən Ruha çevirir.", tr: "Yangın Hayaletine dönüştürür.", en: "Turns Sim into a Fire Ghost (remove_trait to resurrect)." } },
+        { type: "deaths", cat: { ru: "Смерть и Призраки", az: "Ölüm və Ruhlar", tr: "Ölüm ve Hayaletler", en: "Deaths & Ghosts" }, code: "traits.equip_trait ghost_electrocution", desc: { ru: "Превращает сима в электрического Призрака (смерть от Удара током).", az: "Cərəyan vurmasından ölən Ruha çevirir.", tr: "Elektrik Çarpması Hayaletine dönüştürür.", en: "Turns Sim into an Electrocution Ghost." } },
+        { type: "deaths", cat: { ru: "Смерть и Призраки", az: "Ölüm və Ruhlar", tr: "Ölüm ve Hayaletler", en: "Deaths & Ghosts" }, code: "traits.equip_trait ghost_drown", desc: { ru: "Превращает сима в водяного Призрака (смерть от Утопления).", az: "Boğulmadan ölən Ruha çevirir.", tr: "Boğulma Hayaletine dönüştürür.", en: "Turns Sim into a Drowning Ghost." } },
+        { type: "deaths", cat: { ru: "Смерть и Призраки", az: "Ölüm və Ruhlar", tr: "Ölüm ve Hayaletler", en: "Deaths & Ghosts" }, code: "traits.equip_trait ghost_oldage", desc: { ru: "Превращает сима в Призрака, умершего от Старости (remove_trait воскрешает его!).", az: "Qocalıqdan ölən Ruha çevirir (remove_trait dirildir!).", tr: "Yaşlılık Hayaletine dönüştürür (remove_trait canlandırır!).", en: "Turns Sim into an Old Age Ghost (remove_trait resurrects)." } },
+        { type: "deaths", cat: { ru: "Смерть и Призраки", az: "Ölüm və Ruhlar", tr: "Ölüm ve Hayaletler", en: "Deaths & Ghosts" }, code: "traits.equip_trait ghost_cowplant", desc: { ru: "Превращает сима в Призрака, съеденного Проглотис Людоедией (Коровкой).", az: "İnək-bitki tərəfindən yeyilmiş Ruha çevirir.", tr: "İnek Bitkisi Hayaletine dönüştürür.", en: "Turns Sim into a Cowplant Ghost." } },
+        { type: "deaths", cat: { ru: "Смерть и Призраки", az: "Ölüm və Ruhlar", tr: "Ölüm ve Hayaletler", en: "Deaths & Ghosts" }, code: "traits.equip_trait trait_Ghost_Meteorite", desc: { ru: "Превращает сима в Призрака от падения Метеорита.", az: "Meteorit düşməsindən ölən Ruha çevirir.", tr: "Meteorit Hayaletine dönüştürür.", en: "Turns Sim into a Meteorite Ghost." } },
+
+        // 11. ПОГОДА, ВРЕМЕНА ГОДА, ЭКОЛОГИЯ И СЛАВА
+        { type: "world", cat: { ru: "Погода и Мир", az: "Hava və Dünya", tr: "Hava ve Dünya", en: "Weather & World" }, code: "seasons.set_season 0", desc: { ru: "Мгновенно включает Лето (замените 0 на: 1 — Осень, 2 — Зима, 3 — Весна).", az: "Yay fəslini aktivləşdirir (1 — Payız, 2 — Qış, 3 — Yaz).", tr: "Mevsimi Yaz yapar (1: Sonbahar, 2: Kış, 3: İlkbahar).", en: "Sets season to Summer (1: Fall, 2: Winter, 3: Spring)." } },
+        { type: "world", cat: { ru: "Погода и Мир", az: "Hava və Dünya", tr: "Hava ve Dünya", en: "Weather & World" }, code: "seasons.advance_season", desc: { ru: "Переключает календарь сразу на следующее время года.", az: "Təqvimi növbəti fəslə keçirir.", tr: "Bir sonraki mevsime geçirir.", en: "Advances the calendar to the next season." } },
+        { type: "world", cat: { ru: "Погода и Мир", az: "Hava və Dünya", tr: "Hava ve Dünya", en: "Weather & World" }, code: "weather.start_weather_event weather_Sunny_Warm", desc: { ru: "Делает погоду в городе теплой, ясной и солнечной.", az: "Havanı isti və günəşli edir.", tr: "Havayı sıcak ve güneşli yapar.", en: "Changes weather to warm and sunny." } },
+        { type: "world", cat: { ru: "Погода и Мир", az: "Hava və Dünya", tr: "Hava ve Dünya", en: "Weather & World" }, code: "weather.start_weather_event weather_Rain_Storm_Cool", desc: { ru: "Вызывает сильную грозу с ливнем и молниями.", az: "Şimşəkli güclü yağış və tufan başladır.", tr: "Şiddetli gök gürültülü fırtına başlatır.", en: "Starts a cool thunderstorm with lightning." } },
+        { type: "world", cat: { ru: "Погода и Мир", az: "Hava və Dünya", tr: "Hava ve Dünya", en: "Weather & World" }, code: "weather.start_weather_event weather_Snow_Storm_Freezing", desc: { ru: "Вызывает снежную бурю и метель.", az: "Qar fırtınası və çovğun başladır.", tr: "Dondurucu kar fırtınası başlatır.", en: "Starts a freezing blizzard snowstorm." } },
+        { type: "world", cat: { ru: "Погода и Мир", az: "Hava və Dünya", tr: "Hava ve Dünya", en: "Weather & World" }, code: "weather.summon_lightning_strike", desc: { ru: "Вызывает удар молнии по участку.", az: "Sahəyə ildırım zərbəsi endirir.", tr: "Arsaya yıldırım düşürür.", en: "Summons a lightning strike on the lot." } },
+        { type: "world", cat: { ru: "Погода и Мир", az: "Hava və Dünya", tr: "Hava ve Dünya", en: "Weather & World" }, code: "eco_footprint.set_eco_footprint_state 0", desc: { ru: "[Экология] Делает район экологически чистым и зеленым (1 — нейтральный, 2 — промышленный смог).", az: "[Ekologiya] Rayonu ekoloji təmiz və yaşıl edir.", tr: "[Ekoloji] Mahallenin ekolojik ayak izini Yeşil yapar.", en: "[Eco] Sets neighborhood eco footprint to Green (1: Neutral, 2: Industrial)." } }
+    ];
+
+    /* === 8. СОСТОЯНИЕ И НАСТРОЙКИ === */
+    var lang = SafeStore.get('lang', 'ru');
+    if (!I18N[lang]) lang = 'ru';
+    var theme = SafeStore.get('theme', 'dark');
+    var tipsOn = SafeStore.get('tipsOn', true);
+    var cat = SafeStore.get('cat', 'all');
+    var sims = SafeStore.get('sims', ["Белла Гот", "Мортимер Гот"]);
+    if (!Array.isArray(sims)) sims = ["Белла Гот", "Мортимер Гот"];
+    var sim1 = SafeStore.get('sim1', sims[0] || "");
+    var sim2 = SafeStore.get('sim2', sims[1] || sims[0] || "");
+    var relVal = SafeStore.get('relVal', 100);
+
+    /* === 9. УМНОЕ ПОЗИЦИОНИРОВАНИЕ ОБЛАЧКА SIMS === */
+    var bubbleEl = document.getElementById('simsThoughtBubble');
+    var bubbleTitleEl = document.getElementById('bubbleTitle');
+    var bubbleTextEl = document.getElementById('bubbleText');
+    var activeTipTarget = null;
+
+    function renderTipsAndSfxButtons() {
+        var t = I18N[lang];
+        var tBtn = document.getElementById('tipsBtn');
+        var tLbl = document.getElementById('ui-tips');
+        tBtn.classList.toggle('active', tipsOn);
+        tLbl.textContent = tipsOn ? t.tipsOn : t.tipsOff;
+        if (!tipsOn) bubbleEl.classList.remove('visible');
+
+        var sBtn = document.getElementById('sfxBtn');
+        var sLbl = document.getElementById('ui-sfx');
+        sBtn.classList.toggle('active', sfxOn);
+        sLbl.textContent = sfxOn ? t.sfxOn : t.sfxOff;
+    }
+
+    function positionBubbleSmart(target, mouseClientX) {
+        if (!target) return;
+        var rect = target.getBoundingClientRect();
+        var centerX = (rect.width > 220 && mouseClientX) ? mouseClientX : (rect.left + rect.width / 2);
+        var x = Math.min(Math.max(centerX, 135), window.innerWidth - 135);
+
+        if (rect.top < 115) {
+            bubbleEl.classList.add('flip-bottom');
+            bubbleEl.style.left = x + 'px';
+            bubbleEl.style.top = (rect.bottom + 18) + 'px';
+        } else {
+            bubbleEl.classList.remove('flip-bottom');
+            bubbleEl.style.left = x + 'px';
+            bubbleEl.style.top = (rect.top - 18) + 'px';
+        }
+    }
+
+    document.addEventListener('mouseover', function(e) {
+        if (!tipsOn) return;
+        var target = e.target.closest('[data-tip]');
+        if (!target) {
+            activeTipTarget = null;
+            bubbleEl.classList.remove('visible');
+            return;
+        }
+        activeTipTarget = target;
+        var key = target.getAttribute('data-tip');
+        var t = I18N[lang];
+        var tipText = (t.tips && t.tips[key]) ? t.tips[key] : '';
+        if (!tipText) return;
+
+        bubbleTitleEl.textContent = t.bubbleHeader;
+        bubbleTextEl.textContent = tipText;
+        positionBubbleSmart(target, e.clientX);
+        bubbleEl.classList.add('visible');
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!tipsOn || !activeTipTarget || !bubbleEl.classList.contains('visible')) return;
+        positionBubbleSmart(activeTipTarget, e.clientX);
+    });
+
+    document.addEventListener('mouseout', function(e) {
+        var target = e.target.closest('[data-tip]');
+        if (target && !target.contains(e.relatedTarget)) {
+            activeTipTarget = null;
+            bubbleEl.classList.remove('visible');
+        }
+    });
+
+    /* === 10. ГОЛОСОВОЙ ПОИСК === */
+    var voiceBtn = document.getElementById('voiceSearchBtn');
+    var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var recognition = null;
+    if (SpeechRec) {
+        recognition = new SpeechRec();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = function() {
+            voiceBtn.classList.add('listening');
+            document.getElementById('searchInput').placeholder = I18N[lang].voiceListen;
+        };
+        recognition.onresult = function(event) {
+            var transcript = event.results[0][0].transcript || '';
+            transcript = transcript.replace(/[.,!?]/g, '').trim();
+            var inp = document.getElementById('searchInput');
+            inp.value = transcript;
+            renderCards();
+        };
+        recognition.onend = function() {
+            voiceBtn.classList.remove('listening');
+            document.getElementById('searchInput').placeholder = I18N[lang].search;
+        };
+        recognition.onerror = function() {
+            voiceBtn.classList.remove('listening');
+            document.getElementById('searchInput').placeholder = I18N[lang].search;
+        };
+    }
+
+    voiceBtn.addEventListener('click', function() {
+        AudioEngine.playUIClick();
+        if (!recognition) {
+            var toast = document.getElementById('toastBox');
+            toast.textContent = '⚠️ Браузер не поддерживает голосовой ввод';
+            toast.classList.add('show');
+            setTimeout(function() { toast.classList.remove('show'); }, 2000);
+            return;
+        }
+        var langMap = { ru: 'ru-RU', az: 'az-AZ', tr: 'tr-TR', en: 'en-US' };
+        recognition.lang = langMap[lang] || 'ru-RU';
+        try { recognition.start(); } catch (e) { recognition.stop(); }
+    });
+
+    /* === 11. ПОЛЗУНКИ, КОПИРОВАНИЕ И ОТРИСОВКА === */
+    function updateSliderVisual(slider) {
+        if (!slider) return;
+        var min = parseFloat(slider.min) || 0;
+        var max = parseFloat(slider.max) || 100;
+        var val = parseFloat(slider.value) || 0;
+        var pct = ((val - min) / (max - min)) * 100;
+        slider.style.setProperty('--val', pct + '%');
+    }
+
+    function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+    }
+
+    function copyToClipboard(text, btnEl) {
+        AudioEngine.playUICopy();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).catch(function() { fallbackCopy(text); });
+        } else {
+            fallbackCopy(text);
+        }
+
+        var toast = document.getElementById('toastBox');
+        toast.textContent = '✅ ' + I18N[lang].copied + ' (' + text + ')';
+        toast.classList.add('show');
+        clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 1800);
+
+        if (btnEl) {
+            var oldHtml = btnEl.innerHTML;
+            btnEl.classList.add('copied');
+            btnEl.innerHTML = '✅ ' + I18N[lang].copied;
+            setTimeout(function() {
+                btnEl.classList.remove('copied');
+                btnEl.innerHTML = oldHtml;
+            }, 1200);
+        }
+    }
+
+    function renderTheme() {
+        document.documentElement.setAttribute('data-theme', theme);
+        var t = I18N[lang];
+        var btn = document.getElementById('themeBtn');
+        btn.innerHTML = (theme === 'dark') ? ('🌙 <span>' + t.themeDark + '</span>') : ('☀️ <span>' + t.themeLight + '</span>');
+    }
+
+    function renderSims() {
+        var t = I18N[lang];
+        var s1 = document.getElementById('sim1Select');
+        var s2 = document.getElementById('sim2Select');
+        var box = document.getElementById('simChipsBox');
+
+        if (sims.length === 0) {
+            s1.innerHTML = '<option value="">' + t.defSim1 + '</option>';
+            s2.innerHTML = '<option value="">' + t.defSim2 + '</option>';
+            box.innerHTML = '<span style="font-size:12px; color:var(--text-muted);">' + t.noSims + '</span>';
+            return;
+        }
+        if (sims.indexOf(sim1) === -1) sim1 = sims[0];
+        if (sims.indexOf(sim2) === -1) sim2 = sims[1] || sims[0];
+
+        s1.innerHTML = sims.map(function(n) {
+            return '<option value="' + n.replace(/"/g, '&quot;') + '"' + (n === sim1 ? ' selected' : '') + '>' + n + '</option>';
+        }).join('');
+        s2.innerHTML = sims.map(function(n) {
+            return '<option value="' + n.replace(/"/g, '&quot;') + '"' + (n === sim2 ? ' selected' : '') + '>' + n + '</option>';
+        }).join('');
+
+        box.innerHTML = sims.map(function(n, idx) {
+            var act = (n === sim1) ? ' active' : '';
+            return '<div class="sim-chip' + act + '" data-sim-idx="' + idx + '">' +
+                       '<span>👤 ' + n + '</span>' +
+                       '<button type="button" class="sim-del" data-del-idx="' + idx + '">✕</button>' +
+                   '</div>';
+        }).join('');
+    }
+
+    function renderSelectors() {
+        var sel = document.getElementById('skillSelect');
+        var savedIdx = SafeStore.get('skillIdx', 0);
+        sel.innerHTML = SKILLS.map(function(s, i) {
+            return '<option value="' + i + '">' + s[lang] + '</option>';
+        }).join('');
+        sel.selectedIndex = (savedIdx >= 0 && savedIdx < SKILLS.length) ? savedIdx : 0;
+
+        var cSel = document.getElementById('careerSelect');
+        var savedCIdx = SafeStore.get('careerIdx', 0);
+        cSel.innerHTML = CAREERS.map(function(c, i) {
+            return '<option value="' + i + '">' + c[lang] + '</option>';
+        }).join('');
+        cSel.selectedIndex = (savedCIdx >= 0 && savedCIdx < CAREERS.length) ? savedCIdx : 0;
+
+        updateGenerators();
+    }
+
+    function updateGenerators() {
+        // 1. Навык
+        var sel = document.getElementById('skillSelect');
+        var idx = parseInt(sel.value, 10) || 0;
+        var sk = SKILLS[idx] || SKILLS[0];
+        var lvlIn = document.getElementById('skillLvlInput');
+        lvlIn.max = sk.max;
+        var lvl = parseInt(lvlIn.value, 10) || 1;
+        if (lvl > sk.max) lvl = sk.max;
+        lvlIn.value = lvl;
+        updateSliderVisual(lvlIn);
+
+        document.getElementById('skillBadge').textContent = lvl + ' / ' + sk.max + (lvl === sk.max ? ' MAX' : '');
+        SafeStore.set('skillIdx', idx);
+        var skCmd = 'stats.set_skill_level ' + sk.code + ' ' + lvl;
+        document.getElementById('skillCodeOut').textContent = skCmd;
+        document.getElementById('copySkillBtn').setAttribute('data-copy', skCmd);
+
+        // 2. Карьера
+        var cSel = document.getElementById('careerSelect');
+        var cIdx = parseInt(cSel.value, 10) || 0;
+        var cr = CAREERS[cIdx] || CAREERS[0];
+        var cAct = document.getElementById('careerActionSelect').value || 'promote';
+        SafeStore.set('careerIdx', cIdx);
+        var crCmd = 'careers.' + cAct + ' ' + cr.code;
+        document.getElementById('careerCodeOut').textContent = crCmd;
+        document.getElementById('copyCareerBtn').setAttribute('data-copy', crCmd);
+
+        // 3. Деньги
+        var mIn = document.getElementById('moneyInput');
+        var moneyVal = parseInt(mIn.value, 10) || 0;
+        updateSliderVisual(mIn);
+        document.getElementById('moneyBadge').textContent = moneyVal.toLocaleString('ru-RU') + ' §';
+        var mCmd = 'Money ' + moneyVal;
+        document.getElementById('moneyCodeOut').textContent = mCmd;
+        document.getElementById('copyMoneyBtn').setAttribute('data-copy', mCmd);
+
+        // 4. Отношения
+        var rIn = document.getElementById('relRange');
+        relVal = parseInt(rIn.value, 10) || 0;
+        updateSliderVisual(rIn);
+        SafeStore.set('relVal', relVal);
+        document.getElementById('relBadge').textContent = (relVal > 0 ? '+' + relVal : relVal);
+    }
+
+    function renderCategories() {
+        var bar = document.getElementById('catsBar');
+        var t = I18N[lang];
+        var cats = [];
+        for (var i = 0; i < CHEATS.length; i++) {
+            var cName = CHEATS[i].cat[lang];
+            if (cats.indexOf(cName) === -1) cats.push(cName);
+        }
+        if (cat !== 'all' && cats.indexOf(cat) === -1) cat = 'all';
+
+        var html = '<button type="button" class="cat-pill' + (cat === 'all' ? ' active' : '') + '" data-cat="all">' + t.allCat + '</button>';
+        for (var j = 0; j < cats.length; j++) {
+            var isAct = (cat === cats[j]) ? ' active' : '';
+            html += '<button type="button" class="cat-pill' + isAct + '" data-cat="' + cats[j] + '">' + cats[j] + '</button>';
+        }
+        var totalCount = CHEATS.length + SKILLS.length + CAREERS.length;
+        html += '<span class="count-badge">💎 ' + t.foundLbl + ' ' + totalCount + '+</span>';
+        bar.innerHTML = html;
+    }
+
+    function formatCode(raw) {
+        var t = I18N[lang];
+        var s1 = (sims.length > 0 && sim1) ? sim1 : t.defSim1;
+        var s2 = (sims.length > 0 && sim2) ? sim2 : t.defSim2;
+        return raw.replace(/\{SIM1\}/g, s1).replace(/\{SIM2\}/g, s2).replace(/\{REL\}/g, relVal);
+    }
+
+    function renderCards() {
+        var grid = document.getElementById('cardsGrid');
+        var q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+        var t = I18N[lang];
+        var html = '';
+
+        for (var i = 0; i < CHEATS.length; i++) {
+            var item = CHEATS[i];
+            var cName = item.cat[lang];
+            var desc = item.desc[lang];
+            var finalCode = formatCode(item.code);
+            var st = STYLES[item.type] || STYLES.basics;
+
+            var matchCat = (cat === 'all' || cat === cName);
+            var matchSearch = !q ||
+                finalCode.toLowerCase().indexOf(q) !== -1 ||
+                desc.toLowerCase().indexOf(q) !== -1 ||
+                cName.toLowerCase().indexOf(q) !== -1;
+
+            if (matchCat && matchSearch) {
+                var delay = (i % 8) * 0.025;
+                var simBadge = item.hasSim ? '<span class="sim-inserted-tag">' + t.simTag + '</span>' : '';
+                var safeCodeAttr = finalCode.replace(/"/g, '&quot;');
+                html += '<div class="cheat-card" style="animation-delay:' + delay + 's">' +
+                            '<div class="card-top" style="background:' + st.bg + '">' +
+                                '<span class="cat-tag">' + cName + '</span>' +
+                                '<span class="card-emoji">' + st.icon + '</span>' +
+                                simBadge +
+                            '</div>' +
+                            '<div class="card-content">' +
+                                '<div>' +
+                                    '<div class="code-display">' + finalCode + '</div>' +
+                                    '<p class="card-desc">' + desc + '</p>' +
+                                '</div>' +
+                                '<button type="button" class="btn-copy js-copy-btn" data-copy="' + safeCodeAttr + '">' +
+                                    '📋 <span>' + t.copy + '</span>' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>';
+            }
+        }
+        grid.innerHTML = html;
+    }
+
+    function applyLanguage(newLang) {
+        if (!I18N[newLang]) newLang = 'ru';
+        lang = newLang;
+        SafeStore.set('lang', lang);
+
+        var langBtns = document.querySelectorAll('.lang-btn');
+        for (var i = 0; i < langBtns.length; i++) {
+            langBtns[i].classList.toggle('active', langBtns[i].getAttribute('data-lang') === lang);
+        }
+
+        var t = I18N[lang];
+        document.getElementById('ui-title').textContent = t.title;
+        document.getElementById('ui-author-top').textContent = t.authorTop;
+        document.getElementById('ui-footer-author').textContent = t.authorFooter;
+        document.getElementById('ui-pip').textContent = t.pip;
+        document.getElementById('ui-q1').textContent = t.q1;
+        document.getElementById('ui-q2').textContent = t.q2;
+        document.getElementById('ui-q3').textContent = t.q3;
+        document.getElementById('ui-sims-head').textContent = t.simsHead;
+        document.getElementById('simNameInput').placeholder = t.simPlaceholder;
+        document.getElementById('addSimBtn').textContent = t.addBtn;
+        document.getElementById('ui-sim1-lbl').textContent = t.sim1Lbl;
+        document.getElementById('ui-sim2-lbl').textContent = t.sim2Lbl;
+        document.getElementById('ui-rel-slider-lbl').textContent = t.relSliderLbl;
+        document.getElementById('ui-career-lbl').textContent = t.careerLbl;
+        document.getElementById('ui-career-act-lbl').textContent = t.careerActLbl;
+        document.getElementById('ui-gen-head').textContent = t.genHead;
+        document.getElementById('ui-skill-lbl').textContent = t.skillLbl;
+        document.getElementById('ui-lvl-lbl').textContent = t.lvlLbl;
+        document.getElementById('ui-money-lbl').textContent = t.moneyLbl;
+        document.getElementById('searchInput').placeholder = t.search;
+
+        renderTheme();
+        renderTipsAndSfxButtons();
+        AudioEngine.updateMusicUI();
+        renderSims();
+        renderSelectors();
+        renderCategories();
+        renderCards();
+    }
+
+    /* === 12. ОБРАБОТЧИКИ СОБЫТИЙ И ЗВУКОВ КНОПОК === */
+    document.addEventListener('click', function(e) {
+        var copyBtn = e.target.closest('.js-copy-btn');
+        if (copyBtn) {
+            copyToClipboard(copyBtn.getAttribute('data-copy'), copyBtn);
+            return;
+        }
+        var presetBtn = e.target.closest('.preset-pill');
+        if (presetBtn) {
+            AudioEngine.playUIClick();
+            document.getElementById('moneyInput').value = presetBtn.getAttribute('data-money');
+            updateGenerators();
+            return;
+        }
+        var catBtn = e.target.closest('.cat-pill');
+        if (catBtn) {
+            AudioEngine.playUITab();
+            cat = catBtn.getAttribute('data-cat') || 'all';
+            SafeStore.set('cat', cat);
+            renderCategories();
+            renderCards();
+            return;
+        }
+        var lBtn = e.target.closest('.lang-btn');
+        if (lBtn) {
+            AudioEngine.playUITab();
+            applyLanguage(lBtn.getAttribute('data-lang'));
+            return;
+        }
+        var delBtn = e.target.closest('.sim-del');
+        if (delBtn) {
+            AudioEngine.playUIDelete();
+            var delIdx = parseInt(delBtn.getAttribute('data-del-idx'), 10);
+            if (!isNaN(delIdx)) {
+                sims.splice(delIdx, 1);
+                SafeStore.set('sims', sims);
+                renderSims();
+                renderCards();
+            }
+            return;
+        }
+        var chip = e.target.closest('.sim-chip');
+        if (chip) {
+            AudioEngine.playUIClick();
+            var sIdx = parseInt(chip.getAttribute('data-sim-idx'), 10);
+            if (!isNaN(sIdx) && sims[sIdx]) {
+                sim1 = sims[sIdx];
+                SafeStore.set('sim1', sim1);
+                renderSims();
+                renderCards();
+            }
+            return;
+        }
+    });
+
+    document.getElementById('sulsulBtn').addEventListener('click', function() { AudioEngine.saySulSul(); });
+    document.getElementById('plumbobLogo').addEventListener('click', function() { AudioEngine.saySulSul(); });
+    document.getElementById('musicBtn').addEventListener('click', function() {
+        AudioEngine.playUIClick();
+        AudioEngine.toggleMusic();
+    });
+
+    document.getElementById('sfxBtn').addEventListener('click', function() {
+        sfxOn = !sfxOn;
+        SafeStore.set('sfxOn', sfxOn);
+        if (sfxOn) AudioEngine.playUIClick();
+        renderTipsAndSfxButtons();
+    });
+
+    document.getElementById('tipsBtn').addEventListener('click', function() {
+        AudioEngine.playUIClick();
+        tipsOn = !tipsOn;
+        SafeStore.set('tipsOn', tipsOn);
+        renderTipsAndSfxButtons();
+    });
+
+    var modal = document.getElementById('audioModal');
+    document.getElementById('openAudioModalBtn').addEventListener('click', function() {
+        AudioEngine.playUIClick();
+        modal.classList.add('open');
+    });
+    document.getElementById('closeModalBtn').addEventListener('click', function() {
+        AudioEngine.playUIDelete();
+        modal.classList.remove('open');
+    });
+
+    document.getElementById('sulsulFileInput').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        hasSulSulBlob = true;
+        sulsulEl.src = URL.createObjectURL(file);
+        AudioDB.saveFile('sulsulBlob', file);
+        AudioEngine.saySulSul(function() {
+            AudioEngine.startMusic();
+        });
+    });
+
+    document.getElementById('musicFileInput').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        hasMusicBlob = true;
+        musicEl.src = URL.createObjectURL(file);
+        AudioDB.saveFile('musicBlob', file);
+        AudioEngine.startMusic();
+    });
+
+    document.getElementById('themeBtn').addEventListener('click', function() {
+        AudioEngine.playUIClick();
+        theme = (theme === 'dark') ? 'light' : 'dark';
+        SafeStore.set('theme', theme);
+        renderTheme();
+    });
+
+    document.getElementById('addSimBtn').addEventListener('click', function() {
+        var inp = document.getElementById('simNameInput');
+        var val = (inp.value || '').trim();
+        if (!val) return;
+        AudioEngine.playUICopy();
+        if (sims.indexOf(val) === -1) {
+            sims.push(val);
+            SafeStore.set('sims', sims);
+        }
+        sim1 = val;
+        SafeStore.set('sim1', sim1);
+        inp.value = '';
+        renderSims();
+        renderCards();
+    });
+
+    document.getElementById('simNameInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') document.getElementById('addSimBtn').click();
+    });
+
+    document.getElementById('sim1Select').addEventListener('change', function(e) {
+        AudioEngine.playUIClick();
+        sim1 = e.target.value;
+        SafeStore.set('sim1', sim1);
+        renderSims();
+        renderCards();
+    });
+
+    document.getElementById('sim2Select').addEventListener('change', function(e) {
+        AudioEngine.playUIClick();
+        sim2 = e.target.value;
+        SafeStore.set('sim2', sim2);
+        renderSims();
+        renderCards();
+    });
+
+    document.getElementById('skillSelect').addEventListener('change', function() {
+        AudioEngine.playUIClick();
+        updateGenerators();
+    });
+    document.getElementById('careerSelect').addEventListener('change', function() {
+        AudioEngine.playUIClick();
+        updateGenerators();
+    });
+    document.getElementById('careerActionSelect').addEventListener('change', function() {
+        AudioEngine.playUIClick();
+        updateGenerators();
+    });
+
+    document.getElementById('skillLvlInput').addEventListener('input', function() {
+        AudioEngine.playSliderTick();
+        updateGenerators();
+    });
+    document.getElementById('moneyInput').addEventListener('input', function() {
+        AudioEngine.playSliderTick();
+        updateGenerators();
+    });
+    document.getElementById('relRange').addEventListener('input', function() {
+        AudioEngine.playSliderTick();
+        updateGenerators();
+        renderCards();
+    });
+    document.getElementById('searchInput').addEventListener('input', renderCards);
+
+    var topBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', function() {
+        topBtn.classList.toggle('visible', window.scrollY > 280);
+    });
+    topBtn.addEventListener('click', function() {
+        AudioEngine.playUIClick();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.getElementById('pipBtn').addEventListener('click', function() {
+        AudioEngine.playUIClick();
+        window.open(window.location.href, 'Sims4ProMini', 'width=470,height=740,menubar=no,toolbar=no,location=no,status=no');
+    });
+
+    // Инициализация
+    document.getElementById('relRange').value = relVal;
+    applyLanguage(lang);
+
+    /* === 13. АВТОЗАПУСК ПРИ ОТКРЫТИИ: СНАЧАЛА ВАШ "СУЛ-СУЛ", ЗАТЕМ ВАША "MUSIC" === */
+    var chainStarted = false;
+    function startOpeningSequence() {
+        if (chainStarted) return;
+        chainStarted = true;
+        AudioEngine.saySulSul(function() {
+            AudioEngine.startMusic();
+        });
+    }
+
+    window.addEventListener('load', function() {
+        setTimeout(startOpeningSequence, 200);
+    });
+
+    function unlockUserAudio() {
+        if (sulsulEl.paused && musicEl.paused) {
+            chainStarted = false;
+            startOpeningSequence();
+        }
+        document.removeEventListener('pointerdown', unlockUserAudio);
+        document.removeEventListener('keydown', unlockUserAudio);
+    }
+    document.addEventListener('pointerdown', unlockUserAudio);
+    document.addEventListener('keydown', unlockUserAudio);
+})();
+</script>
+</body>
+</html>

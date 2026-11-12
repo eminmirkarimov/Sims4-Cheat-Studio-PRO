@@ -1,0 +1,20 @@
+THE SIMS 4 CHEAT STUDIO PRO
+
+Copyright (c) 2026 Emin Mirkarimov.
+All rights reserved.
+
+The original HTML interface, source code, command catalog compilation,
+translations, descriptions, visual layout and project documentation are
+claimed by the author to the extent permitted by applicable law.
+
+The provided executable is distributed by the author as a downloadable
+personal-use build. No permission is granted to sell, repackage, modify,
+redistribute, sublicense or publish modified copies of the application or
+source code without prior written permission from the author.
+
+No open-source license is granted by this notice. A public GitHub repository
+is not, by itself, a license to reuse the code.
+
+The Sims and The Sims 4 are trademarks of their respective owners. This
+project is an independent fan-made companion and is not affiliated with or
+endorsed by Electronic Arts Inc. or Maxis.
