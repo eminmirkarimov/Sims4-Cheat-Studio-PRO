@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Sims 4 Cheat Studio PRO — by Emin Mirkarimov</title>
+    <title>The Sims 4 Cheat Studio PRO — Quick Reference by Emin Mirkarimov</title>
+    <meta name="description" content="A searchable quick reference to built-in The Sims 4 console commands. Find a command, read what it does, and copy it for manual entry.">
+    <meta name="author" content="Emin Mirkarimov">
+    <meta name="description" content="An independent multilingual companion tool for The Sims 4, with a searchable command reference and interactive generators. Created by Emin Mirkarimov.">
+    <meta name="theme-color" content="#07111f">
+    <meta property="og:title" content="The Sims 4 Cheat Studio PRO">
+    <meta property="og:description" content="Your next save. Your rules. Your commands. An independent companion tool by Emin Mirkarimov.">
+    <meta property="og:type" content="website">
     <style>
         /* === ТЕМЫ И ПЕРЕМЕННЫЕ В СТИЛЕ SIMS 4 === */
         :root { scroll-behavior: smooth; }
@@ -831,6 +838,8 @@
         }
         .footer-inner { max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .footer-credit { font-size: 14px; font-weight: 800; color: var(--text-main); }
+        .footer-legal { max-width: 900px; margin: 8px auto 0; color: var(--text-muted); font-size: 10.5px; line-height: 1.55; }
+        .footer-legal a { color: var(--sims-blue); text-decoration: underline; text-underline-offset: 2px; }
         .insta-link {
             display: inline-flex;
             align-items: center;
@@ -865,6 +874,108 @@
             z-index: 9999;
         }
         #toastBox.show { opacity: 1; transform: translateY(0); }
+
+        /* === QUICK-REFERENCE INTRO PANEL === */
+        .reference-banner {
+            width: min(1320px, calc(100% - 40px));
+            margin: 22px auto 4px;
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            border: 1px solid rgba(46, 204, 113, 0.38);
+            border-radius: 22px;
+            background: linear-gradient(115deg, rgba(15, 39, 38, 0.96), rgba(9, 28, 51, 0.96) 58%, rgba(38, 24, 70, 0.94));
+            box-shadow: 0 14px 34px rgba(0,0,0,0.28);
+        }
+        :root[data-theme="light"] .reference-banner {
+            background: linear-gradient(115deg, rgba(232, 255, 239, 0.98), rgba(231, 246, 255, 0.98) 58%, rgba(244, 235, 255, 0.98));
+            border-color: rgba(30, 185, 68, 0.42);
+        }
+        .reference-banner::after {
+            content: '';
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            right: 8%;
+            top: -145px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(46,204,113,0.2), transparent 70%);
+            pointer-events: none;
+        }
+        .reference-copy { max-width: 900px; position: relative; z-index: 1; }
+        .reference-kicker {
+            color: #5ee69a;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 1.35px;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+        :root[data-theme="light"] .reference-kicker { color: #158a45; }
+        .reference-title {
+            font-size: clamp(21px, 3vw, 30px);
+            line-height: 1.16;
+            font-weight: 900;
+            letter-spacing: -0.6px;
+            color: #f8fafc;
+            margin-bottom: 9px;
+        }
+        :root[data-theme="light"] .reference-title { color: #10243a; }
+        .reference-text {
+            max-width: 820px;
+            color: #d0e4ec;
+            font-size: 13px;
+            line-height: 1.65;
+            margin-bottom: 13px;
+        }
+        :root[data-theme="light"] .reference-text { color: #344b5d; }
+        .reference-links { display: flex; flex-wrap: wrap; align-items: center; gap: 9px 16px; }
+        .reference-official-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #2ecc71, #1689d4);
+            color: #fff;
+            font-size: 11.5px;
+            font-weight: 900;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(0, 168, 255, 0.22);
+        }
+        .reference-official-link:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .reference-note { color: #a9bdc8; font-size: 10.5px; }
+        :root[data-theme="light"] .reference-note { color: #52687a; }
+        .reference-stat {
+            flex: 0 0 148px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            border-left: 1px solid rgba(148,163,184,0.25);
+            padding-left: 24px;
+        }
+        .reference-stat strong {
+            display: block;
+            font-size: 43px;
+            line-height: 1;
+            font-weight: 950;
+            background: linear-gradient(135deg, #69e89f, #4abaff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .reference-stat span { display: block; margin-top: 7px; color: #c3d5df; font-size: 10px; font-weight: 800; letter-spacing: 1px; }
+        :root[data-theme="light"] .reference-stat span { color: #40596e; }
+        @media (max-width: 720px) {
+            .reference-banner { width: calc(100% - 24px); margin-top: 14px; padding: 19px; }
+            .reference-stat { display: none; }
+            .reference-title { font-size: 22px; }
+        }
+
     </style>
 </head>
 <body>
@@ -915,12 +1026,12 @@
     <div class="header-inner">
         <div class="brand">
             <div class="plumbob-box" id="plumbobLogo" data-tip="tip_sulsul">
-                <svg class="plumbob-svg" viewBox="0 0 64 100" fill="none">
-                    <polygon points="32,2 60,50 32,98 4,50" fill="#2ecc71"/>
-                    <polygon points="32,2 60,50 32,50" fill="#58d68d"/>
-                    <polygon points="32,2 4,50 32,50" fill="#28b463"/>
-                    <polygon points="32,98 60,50 32,50" fill="#1d8348"/>
-                    <polygon points="32,98 4,50 32,50" fill="#239b56"/>
+                <svg class="plumbob-svg" viewBox="0 0 64 100" fill="none" aria-hidden="true">
+                    <path d="M32 4 L41 35 L61 50 L41 65 L32 96 L23 65 L3 50 L23 35 Z" fill="#2ecc71"/>
+                    <path d="M32 4 L41 35 L32 50 L23 35 Z" fill="#9ff5bf"/>
+                    <path d="M3 50 L23 35 L32 50 L23 65 Z" fill="#28b463"/>
+                    <path d="M61 50 L41 35 L32 50 L41 65 Z" fill="#00a8ff"/>
+                    <path d="M32 96 L41 65 L32 50 L23 65 Z" fill="#087f8c"/>
                 </svg>
             </div>
             <div>
@@ -966,6 +1077,22 @@
         </div>
     </div>
 </header>
+
+<section class="reference-banner" aria-label="The Sims 4 console command quick reference">
+    <div class="reference-copy">
+        <div class="reference-kicker" id="ui-reference-kicker">📚 БЫСТРАЯ ШПАРГАЛКА ПО ИГРОВЫМ КОМАНДАМ</div>
+        <h1 class="reference-title" id="ui-reference-title">Все штатные команды — в одном месте</h1>
+        <p class="reference-text" id="ui-reference-text">Ищи встроенные команды консоли The Sims 4 по категориям, читай короткие объяснения, используй генераторы и копируй нужную строку. Больше не нужно искать по десяткам страниц.</p>
+        <div class="reference-links">
+            <a class="reference-official-link" id="ui-reference-official" href="https://www.ea.com/ru/games/the-sims/the-sims-4/faq/cheats" target="_blank" rel="noopener noreferrer">🏛️ Официальная справка EA</a>
+            <span class="reference-note" id="ui-reference-note">Независимый справочник Emin Mirkarimov · Не продукт EA</span>
+        </div>
+    </div>
+    <div class="reference-stat" aria-label="103 command cards">
+        <strong>103</strong>
+        <span id="ui-reference-stat">COMMAND CARDS</span>
+    </div>
+</section>
 
 <div class="container">
     <!-- Быстрые главные коды -->
@@ -1107,9 +1234,15 @@
 <footer>
     <div class="footer-inner">
         <div class="footer-credit" id="ui-footer-author">Сделано Эмином Миркеримовым (Created by Emin Mirkarimov)</div>
-        <a href="https://www.instagram.com/emin.mirkarimov" target="_blank" class="insta-link">
+        <a href="https://www.instagram.com/emin.mirkarimov" target="_blank" rel="noopener noreferrer" class="insta-link">
             📸 Instagram: @emin.mirkarimov
         </a>
+        <div class="footer-legal">
+            This project/website is not endorsed by or affiliated with EA or its licensors. The Sims and The Sims 4 are trademarks of their respective owners.
+            <a href="https://www.ea.com/games/the-sims/the-sims-4/faq/cheats" target="_blank" rel="noopener noreferrer">EA official cheat-code FAQ</a> ·
+            <a href="https://help.ea.com/en/articles/security-and-rules/ea-content-policy/" target="_blank" rel="noopener noreferrer">EA Content Policy</a> ·
+            Created by Emin Mirkarimov.
+        </div>
     </div>
 </footer>
 
@@ -1137,7 +1270,7 @@
 
     var l2 = document.getElementById('pLayer2');
     var l3 = document.getElementById('pLayer3');
-    var plumbobSvgStr = '<svg viewBox="0 0 64 100" width="100%" height="100%"><polygon points="32,2 60,50 32,98 4,50" fill="#2ecc71"/><polygon points="32,2 60,50 32,50" fill="#58d68d"/><polygon points="32,98 60,50 32,50" fill="#1d8348"/></svg>';
+    var plumbobSvgStr = '<svg viewBox="0 0 64 100" width="100%" height="100%" aria-hidden="true"><path d="M32 4 L41 35 L61 50 L41 65 L32 96 L23 65 L3 50 L23 35 Z" fill="#2ecc71"/><path d="M32 4 L41 35 L32 50 L23 35 Z" fill="#9ff5bf"/><path d="M3 50 L23 35 L32 50 L23 65 Z" fill="#28b463"/><path d="M61 50 L41 35 L32 50 L41 65 Z" fill="#00a8ff"/><path d="M32 96 L41 65 L32 50 L23 65 Z" fill="#087f8c"/></svg>';
 
     if (l2 && l3) {
         var h2 = '', h3 = '';
@@ -1501,6 +1634,12 @@
             title: "Шпаргалка The Sims 4 PRO",
             authorTop: "Сделано Эмином Миркеримовым",
             authorFooter: "Сделано Эмином Миркеримовым • Полная база всех кодов The Sims 4",
+            refKicker: "📚 БЫСТРАЯ ШПАРГАЛКА ПО ИГРОВЫМ КОМАНДАМ",
+            refTitle: "Все штатные команды — в одном месте",
+            refText: "Ищи встроенные команды консоли The Sims 4 по категориям, читай короткие объяснения, используй генераторы и копируй нужную строку. Больше не нужно искать по десяткам страниц.",
+            refButton: "🏛️ Официальная справка EA",
+            refNote: "Независимый справочник Emin Mirkarimov · Не продукт EA",
+            refStat: "КОМАНД В СПРАВОЧНИКЕ",
             musicOn: "Музыка: ВКЛ",
             musicOff: "Музыка: ВЫКЛ",
             sfxOn: "Звуки: ВКЛ",
@@ -1567,6 +1706,12 @@
             title: "The Sims 4 PRO Şparqalka",
             authorTop: "Emin Mirkarimov tərəfindən hazırlanıb",
             authorFooter: "Emin Mirkarimov tərəfindən hazırlanıb • Bütün Sims 4 kodlarının tam bazası",
+            refKicker: "📚 OYUN ƏMRLƏRİ ÜZRƏ SÜRƏTLİ BƏLƏDÇİ",
+            refTitle: "Bütün daxili əmrlər bir yerdə",
+            refText: "The Sims 4 konsolunun daxili əmrlərini kateqoriyalar üzrə tap, qısa izahları oxu, generatorlardan istifadə et və lazım olan sətri kopyala. Artıq onlarla səhifə axtarmağa ehtiyac yoxdur.",
+            refButton: "🏛️ EA-nın rəsmi məlumatı",
+            refNote: "Emin Mirkarimov tərəfindən hazırlanmış müstəqil bələdçi · EA məhsulu deyil",
+            refStat: "ƏMR KARTI",
             musicOn: "Musiqi: AÇIQ",
             musicOff: "Musiqi: BAĞLI",
             sfxOn: "Səslər: AÇIQ",
@@ -1633,6 +1778,12 @@
             title: "The Sims 4 PRO Hile Rehberi",
             authorTop: "Emin Mirkarimov tarafından yapıldı",
             authorFooter: "Emin Mirkarimov tarafından yapıldı • Tüm Sims 4 Hileleri Ansiklopedisi",
+            refKicker: "📚 OYUN İÇİ KOMUTLAR İÇİN HIZLI REHBER",
+            refTitle: "Yerleşik komutlar tek bir yerde",
+            refText: "The Sims 4 konsolundaki yerleşik komutları kategorilere göre bul, kısa açıklamaları oku, oluşturucuları kullan ve ihtiyacın olan satırı kopyala. Artık onlarca sayfada aramana gerek yok.",
+            refButton: "🏛️ EA Resmî Rehberi",
+            refNote: "Emin Mirkarimov tarafından hazırlanmış bağımsız rehber · EA ürünü değildir",
+            refStat: "KOMUT KARTI",
             musicOn: "Müzik: AÇIK",
             musicOff: "Müzik: KAPALI",
             sfxOn: "Sesler: AÇIK",
@@ -1699,6 +1850,12 @@
             title: "The Sims 4 Cheat Studio PRO",
             authorTop: "Created by Emin Mirkarimov",
             authorFooter: "Created by Emin Mirkarimov • Complete Sims 4 Cheats Encyclopedia",
+            refKicker: "📚 THE QUICK REFERENCE TO IN-GAME COMMANDS",
+            refTitle: "Built-in commands. One handy place.",
+            refText: "Find The Sims 4 built-in console commands by category, read quick explanations, use the generators, and copy the line you need. No more searching through scattered pages.",
+            refButton: "🏛️ Official EA cheat guide",
+            refNote: "Independent reference by Emin Mirkarimov · Not an EA product",
+            refStat: "COMMAND CARDS",
             musicOn: "Music: ON",
             musicOff: "Music: OFF",
             sfxOn: "UI SFX: ON",
@@ -2369,6 +2526,13 @@
         }
 
         var t = I18N[lang];
+        document.getElementById('ui-reference-kicker').textContent = t.refKicker;
+        document.getElementById('ui-reference-title').textContent = t.refTitle;
+        document.getElementById('ui-reference-text').textContent = t.refText;
+        document.getElementById('ui-reference-official').textContent = t.refButton;
+        document.getElementById('ui-reference-official').href = (lang === 'ru') ? 'https://www.ea.com/ru/games/the-sims/the-sims-4/faq/cheats' : 'https://www.ea.com/games/the-sims/the-sims-4/faq/cheats';
+        document.getElementById('ui-reference-note').textContent = t.refNote;
+        document.getElementById('ui-reference-stat').textContent = t.refStat;
         document.getElementById('ui-title').textContent = t.title;
         document.getElementById('ui-author-top').textContent = t.authorTop;
         document.getElementById('ui-footer-author').textContent = t.authorFooter;

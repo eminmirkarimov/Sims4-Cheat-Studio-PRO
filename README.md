@@ -2,7 +2,7 @@
 
 # ✨ THE SIMS 4 CHEAT STUDIO PRO
 
-### Your next save. Your rules. Your commands. 🎮
+### Your quick-reference guide to built-in game commands. 🎮
 
 **An independent companion tool created by [Emin Mirkarimov](https://github.com/eminmirkarimov)**
 
@@ -13,7 +13,7 @@
 
 [🚀 DOWNLOAD THE WINDOWS APP]( https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/releases/latest ) · [🌐 OPEN THE WEB EDITION]( https://eminmirkarimov.github.io/Sims4-Cheat-Studio-PRO/ )
 
-[📖 Русская версия](README_RU.md) · [🐞 Report an issue](https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/issues/new)
+[📖 Русская версия](README_RU.md) · [🧰 Setup guide](GITHUB_SETUP_RU.md) · [🐞 Report an issue](https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/issues/new)
 
 </div>
 
@@ -21,11 +21,15 @@
 
 ## 🌿 Sul Sul! Welcome to your new save file
 
-A little more control, a little less menu-hunting.
+Tired of searching across pages, posts and scattered lists to find one command? Keep the built-in The Sims 4 console commands in one handy place. ✨
 
-**The Sims 4 Cheat Studio PRO** is a fan-made desktop/browser companion that brings a searchable command catalog and several live generators into one compact studio. Find a command, adjust the values, copy it, and enter it yourself in the game's cheat console.
+**The Sims 4 Cheat Studio PRO** is an independent quick-reference library for players. It organizes in-game console commands into searchable categories, explains what each command is for, and includes generators for skills, careers, relationships and household funds. Find it, understand it, copy it — then enter it yourself in the game.
 
-> 🟢 **No game injection. No save-file editing.** The app prepares text commands for you to copy manually. It does not patch the game, modify game files, or run commands inside the game process.
+> 📘 **A reference, not a trainer or a game modification.** The app displays and prepares text commands for manual use in the game's own console. It does not inject code, patch the game, edit save files, or execute commands inside the game process.
+
+### 🏛️ Check the official EA guide
+
+EA publishes its own **[The Sims 4 Cheats — FAQ](https://www.ea.com/games/the-sims/the-sims-4/faq/cheats)**, including built-in Build Mode and Live Mode console commands. This project is an independent, searchable companion reference created to make those commands and related in-game command patterns easier to find. The project is not an EA product, and EA does not review or maintain this catalog.
 
 ## 🎁 Download your Studio
 
@@ -78,13 +82,14 @@ The EXE in the first release is the prebuilt file provided by the author. GitHub
 
 1. Start **The Sims 4** and load your household.
 2. Open Cheat Studio PRO.
-3. Search for a command or use one of the generators.
-4. Press **Copy**.
-5. Return to the game and press **`Ctrl + Shift + C`**.
-6. For commands that require it, enter **`testingcheats true`** first.
-7. Paste the command and press **Enter**.
+3. Search the quick-reference library or use a generator.
+4. Read the note about the command and any pack/gameplay requirements.
+5. Press **Copy**.
+6. Return to the game and press **`Ctrl + Shift + C`**.
+7. If the command requires it, enter **`testingcheats true`** first.
+8. Paste the command and press **Enter**.
 
-Some commands depend on a specific expansion/game pack, active Sim, lot, gameplay state or game version. Check the description before using them. Keep a backup of important saves before experimenting.
+These are in-game console commands, not external hacks or trainers. Some commands depend on a specific expansion/game pack, active Sim, lot, gameplay state or game version. Check the description before using them. Keep a backup of important saves before experimenting. For the EA-published overview, use the [official EA cheat FAQ](https://www.ea.com/games/the-sims/the-sims-4/faq/cheats).
 
 ## 🌍 Choose your language
 
@@ -122,6 +127,7 @@ Sims4-Cheat-Studio-PRO/
 ├── RUN_HTML.bat                    # Open the HTML edition
 ├── README.md                       # English project home
 ├── README_RU.md                    # Russian guide
+├── GITHUB_SETUP_RU.md              # Publishing instructions
 ├── RELEASE_NOTES_v1.0.0.md         # First release notes
 ├── CHANGELOG.md                    # Version history
 ├── COPYRIGHT.txt                   # Author's copyright notice
@@ -165,11 +171,15 @@ Please do not attach EA account information or personal game-save files.
 - Improve accessibility and keyboard navigation.
 - Add clearer versioned command-database updates.
 
+## 📚 What “official in-game commands” means
+
+The catalog is intended as a quick reference to commands available through The Sims 4's own cheat console. EA itself publishes a selection of these commands in its official FAQ linked above. The catalog, translations, layout and generators are an independent work by Emin Mirkarimov; **this does not mean the app is made, verified or supported by EA**. Command availability can vary by game update, installed packs and gameplay state.
+
 ## ⚖️ Fan project, not an official EA product
 
 **Created and maintained by [Emin Mirkarimov](https://github.com/eminmirkarimov).** This independent project is not endorsed by or affiliated with EA or its licensors. The Sims and The Sims 4 are trademarks of their respective owners. See [DISCLAIMER.md](DISCLAIMER.md).
 
-> **Important policy note:** EA's current content policy permits certain personal fan projects but also says not to show hacks or cheats. Because this project displays in-game cheat commands, public distribution or a public Pages website may conflict with that policy. A disclaimer does not grant permission or guarantee that EA will not request removal. Read [EA's Content Policy](https://help.ea.com/en/articles/security-and-rules/ea-content-policy/) before publishing publicly. Details are in [SITE_POLICY_NOTICE.md](SITE_POLICY_NOTICE.md).
+> **Publishing note:** EA's general fan-content policy currently says not to show “hacks or cheats.” EA separately publishes an official FAQ for The Sims 4 console cheat codes, but its policy does not clearly explain whether an independent quick-reference site limited to built-in commands is treated differently. The app does not inject into or modify the game, but that fact is not a guarantee of approval. Review [EA's Content Policy](https://help.ea.com/en/articles/security-and-rules/ea-content-policy/) and [SITE_POLICY_NOTICE.md](SITE_POLICY_NOTICE.md) before making the site public.
 
 ---
 

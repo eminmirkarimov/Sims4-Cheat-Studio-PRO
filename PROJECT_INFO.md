@@ -22,3 +22,19 @@
 The author mentioned that the EXE was originally packaged from HTML and a BAT file, but the original packaging BAT was not present in the uploaded materials. The project therefore includes only the supplied prebuilt EXE and HTML source. `RUN_HTML.bat` is a newly written helper that launches the HTML in the default browser; it is not the original EXE packaging script.
 
 The GitHub Actions workflow only attaches the already-built EXE to a published Release. It does not compile or modify that EXE.
+
+
+## Public repository targets
+
+- GitHub owner: `eminmirkarimov`
+- Repository: `Sims4-Cheat-Studio-PRO`
+- Repository URL: https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO
+- Releases: https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/releases
+- Latest EXE: https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/releases/latest/download/Sims4_Cheat.exe
+- GitHub Pages URL (after enabling Pages): https://eminmirkarimov.github.io/Sims4-Cheat-Studio-PRO/
+
+The Pages URL is reserved by the repository naming convention; it will become available only after the owner creates the repository and enables GitHub Pages.
+
+## Project positioning
+
+The project is presented as an independent quick-reference guide to built-in The Sims 4 console commands. Its player workflow is: search/browse → read description → copy text → manually enter it in the game's console. It does not inject into, patch or modify the game. The repository links to EA's official [The Sims 4 Cheats FAQ](https://www.ea.com/games/the-sims/the-sims-4/faq/cheats) as the primary EA-published reference. The app/catalog itself is not an EA product and is not reviewed or maintained by EA.
