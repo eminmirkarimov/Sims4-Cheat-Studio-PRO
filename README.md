@@ -13,7 +13,7 @@
 
 [🚀 DOWNLOAD THE WINDOWS APP]( https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/releases/latest ) · [🌐 OPEN THE WEB EDITION]( https://eminmirkarimov.github.io/Sims4-Cheat-Studio-PRO/ )
 
-[📖 Русская версия](README_RU.md) · [🧰 Setup guide](GITHUB_SETUP_RU.md) · [🐞 Report an issue](https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/issues/new)
+[📖 Русская версия](README_RU.md) · [🐞 Report an issue](https://github.com/eminmirkarimov/Sims4-Cheat-Studio-PRO/issues/new)
 
 </div>
 
